@@ -13,4 +13,20 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CRM.Application\CRM.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\Identity\" />
+    <Folder Include="Controllers\Customers\" />
+    <Folder Include="Controllers\Leads\" />
+    <Folder Include="Controllers\Deals\" />
+    <Folder Include="Controllers\Activities\" />
+    <Folder Include="Controllers\Analytics\" />
+    <Folder Include="Middleware\" />
+    <Folder Include="Filters\" />
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
 </Project>

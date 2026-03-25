@@ -6,4 +6,32 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CRM.Domain\CRM.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Analytics\DTOs\" />
+    <Folder Include="Analytics\Queries\" />
+    <Folder Include="Analytics\Services\" />
+    <Folder Include="Common\Interfaces\" />
+    <Folder Include="Common\Behaviors\" />
+    <Folder Include="Common\Exceptions\" />
+    <Folder Include="CRM\Activities\Commands\" />
+    <Folder Include="CRM\Activities\DTOs\" />
+    <Folder Include="CRM\Activities\Queries\" />
+    <Folder Include="CRM\Customers\Commands\" />
+    <Folder Include="CRM\Customers\DTOs\" />
+    <Folder Include="CRM\Customers\Queries\" />
+    <Folder Include="CRM\Deals\Commands\" />
+    <Folder Include="CRM\Deals\DTOs\" />
+    <Folder Include="CRM\Deals\Queries\" />
+    <Folder Include="CRM\Leads\Commands\" />
+    <Folder Include="CRM\Leads\DTOs\" />
+    <Folder Include="CRM\Leads\Queries\" />
+    <Folder Include="Identity\Commands\" />
+    <Folder Include="Identity\DTOs\" />
+    <Folder Include="Identity\Queries\" />
+  </ItemGroup>
+
 </Project>
