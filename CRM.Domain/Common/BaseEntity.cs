@@ -9,5 +9,16 @@ namespace CRM.Domain.Common
         public DateTime? UpdatedAtUtc { get; protected set; }
 
         public byte[]? RowVersion { get; protected set; }
+
+        protected BaseEntity()
+        {
+            Id = Guid.NewGuid();
+            CreatedAtUtc = DateTime.UtcNow;
+        }
+
+        public void SetUpdated()
+        {
+            UpdatedAtUtc = DateTime.UtcNow;
+        }
     }
 }

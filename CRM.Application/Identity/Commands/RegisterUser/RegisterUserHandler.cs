@@ -1,0 +1,71 @@
+﻿
+
+using CRM.Application.Identity.DTOs.Auth;
+using CRM.Domain.Identity.Entities;
+
+namespace CRM.Application.Identity.Commands.RegisterUser
+{
+    public class RegisterUserHandler:IRegisterUserHandler
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly ITenantRepository _tenantRepository;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IJwtService _jwtService;
+        private readonly IRefreshTokenService _refreshTokenService;
+
+        public RegisterUserHandler(
+        IUserRepository userRepository,
+        ITenantRepository tenantRepository,
+        IPasswordHasher passwordHasher,
+        IJwtService jwtService,
+        IRefreshTokenService refreshTokenService)
+        {
+            _userRepository = userRepository;
+            _tenantRepository = tenantRepository;
+            _passwordHasher = passwordHasher;
+            _jwtService = jwtService;
+            _refreshTokenService = refreshTokenService;
+        }
+
+        public async Task<AuthResponseDto> HandleAsync(RegisterUserCommand command)
+        {
+            //checks tenant already existed
+            var existingTenant = await _tenantRepository
+            .GetBySlugAsync(command.TenantSlug);
+
+            if (existingTenant != null)
+                throw new Exception("Tenant slug already exists");
+
+            //creating Tenant
+            var tenant = Tenant.Create(command.TenantName, command.TenantSlug);
+
+            var passwordHash = _passwordHasher.Hash(command.Password);
+
+            //create User
+            var user = User.Create(
+                tenant.Id,
+                command.Email,
+                passwordHash,
+                command.DisplayName
+                );
+
+            //save to Db
+            await _tenantRepository.AddAsync(tenant);
+            await _userRepository.AddAsync(user);
+
+            //Token
+            var accessToken = _jwtService.GenerateToken(user, tenant);
+            var refreshToken = await _refreshTokenService.GenerateAsync(user, tenant);
+
+            return new AuthResponseDto
+            {
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+
+        }
+
+    }
+}
