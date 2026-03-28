@@ -1,9 +1,9 @@
-﻿
-
-using CRM.Application.Identity.DTOs.Auth;
+﻿using CRM.Application.Identity.DTOs.Auth;
 using CRM.Domain.Identity.Entities;
 using CRM.Application.Common.Exceptions;
 using FluentValidation;
+
+using CRM.Application.Common.Interfaces;
 
 namespace CRM.Application.Identity.Commands.RegisterUser
 {
@@ -11,6 +11,7 @@ namespace CRM.Application.Identity.Commands.RegisterUser
     {
         private readonly IUserRepository _userRepository;
         private readonly ITenantRepository _tenantRepository;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtService _jwtService;
         private readonly IRefreshTokenService _refreshTokenService;
@@ -18,12 +19,14 @@ namespace CRM.Application.Identity.Commands.RegisterUser
         public RegisterUserHandler(
         IUserRepository userRepository,
         ITenantRepository tenantRepository,
+        IRefreshTokenRepository refreshTokenRepository,
         IPasswordHasher passwordHasher,
         IJwtService jwtService,
         IRefreshTokenService refreshTokenService)
         {
             _userRepository = userRepository;
             _tenantRepository = tenantRepository;
+            _refreshTokenRepository = refreshTokenRepository;
             _passwordHasher = passwordHasher;
             _jwtService = jwtService;
             _refreshTokenService = refreshTokenService;
@@ -53,24 +56,38 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             var user = User.Create(
                 tenant.Id,
                 command.Email,
-                passwordHash,
                 command.DisplayName
                 );
+
+            user.SetPasswordHash(passwordHash);
 
             //save to Db
             await _tenantRepository.AddAsync(tenant);
             await _userRepository.AddAsync(user);
 
             //Token
-            var accessToken = _jwtService.GenerateToken(user, tenant);
-            var refreshToken = await _refreshTokenService.GenerateAsync(user, tenant);
+            var accessToken = _jwtService.GenerateToken(user.Id,
+                                                        tenant.Id,
+                                                        user.Email);
+
+            //  Generate Refresh Token
+            var (rawToken, hash) = _refreshTokenService.Generate();
+
+            var refreshTokenEntity = CRM.Domain.Identity.Entities.RefreshToken.Create(
+                                                        tenant.Id,
+                                                        user.Id,
+                                                        hash,
+                                                        DateTime.UtcNow.AddDays(7)
+                                                    );
+
+            await _refreshTokenRepository.AddAsync(refreshTokenEntity);
 
             return new AuthResponseDto
             {
                 TenantId = tenant.Id,
                 UserId = user.Id,
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = rawToken
             };
 
         }

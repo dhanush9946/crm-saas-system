@@ -3,7 +3,7 @@
 
 namespace CRM.Infrastructure.Services
 {
-    public class PasswordHasher:IPasswordHasher
+    public class BcryptPasswordHasher:IPasswordHasher
     {
         public string Hash(string password)
         {

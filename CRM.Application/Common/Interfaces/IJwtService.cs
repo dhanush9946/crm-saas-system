@@ -5,6 +5,6 @@ namespace CRM.Application.Common.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateToken(User user, Tenant tenant);
+        string GenerateToken(Guid userId, Guid tenantId, string email);
     }
 }

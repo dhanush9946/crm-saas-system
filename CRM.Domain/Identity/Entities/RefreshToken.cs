@@ -28,7 +28,7 @@ namespace CRM.Domain.Identity.Entities
 
         private RefreshToken() { }
 
-        public RefreshToken(
+        private RefreshToken(
             Guid tenantId,
             Guid userId,
             byte[] tokenHash,
@@ -57,11 +57,37 @@ namespace CRM.Domain.Identity.Entities
             IpAddress = ipAddress;
         }
 
+        public static RefreshToken Create(
+                    Guid tenantId,
+                    Guid userId,
+                    byte[] tokenHash,
+                    DateTime expiresAtUtc,
+                    string? deviceId = null,
+                    string? userAgent = null,
+                    string? ipAddress = null)
+        {
+            return new RefreshToken(
+                tenantId,
+                userId,
+                tokenHash,
+                Guid.NewGuid(), // TokenFamilyId generated here
+                expiresAtUtc,
+                deviceId,
+                userAgent,
+                ipAddress
+            );
+        }
+
         public void Revoke(Guid? replacedByTokenId = null)
         {
             RevokedAtUtc = DateTime.UtcNow;
             ReplacedByTokenId = replacedByTokenId;
             SetUpdated();
+        }
+
+        public void MarkAsReplaced(Guid newTokenId)
+        {
+            Revoke(newTokenId);
         }
 
         public bool IsExpired()
@@ -72,6 +98,11 @@ namespace CRM.Domain.Identity.Entities
         public bool IsActive()
         {
             return RevokedAtUtc == null && !IsExpired();
+        }
+
+        public bool IsRevoked()
+        {
+            return RevokedAtUtc != null;
         }
 
     }

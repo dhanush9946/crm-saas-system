@@ -20,14 +20,14 @@ namespace CRM.Infrastructure.Services
             _config = config;
         }
 
-        public string GenerateToken(User user, Tenant tenant)
+        public string GenerateToken(Guid userId, Guid tenantId, string email)
         {
             var claims = new[]
             {
-            new Claim("sub", user.Id.ToString()),
-            new Claim("tid", tenant.Id.ToString()),
-            new Claim("email", user.Email)
-        };
+        new Claim("sub", userId.ToString()),
+        new Claim("tid", tenantId.ToString()),
+        new Claim("email", email)
+    };
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
