@@ -23,7 +23,6 @@
     <Folder Include="Controllers\Deals\" />
     <Folder Include="Controllers\Activities\" />
     <Folder Include="Controllers\Analytics\" />
-    <Folder Include="Middleware\" />
     <Folder Include="Filters\" />
     <Folder Include="Extensions\" />
   </ItemGroup>

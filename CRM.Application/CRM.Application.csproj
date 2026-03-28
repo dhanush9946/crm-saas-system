@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Identity\Validators\**" />
+    <EmbeddedResource Remove="Identity\Validators\**" />
+    <None Remove="Identity\Validators\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CRM.Domain\CRM.Domain.csproj" />
   </ItemGroup>
 
@@ -14,9 +20,7 @@
     <Folder Include="Analytics\DTOs\" />
     <Folder Include="Analytics\Queries\" />
     <Folder Include="Analytics\Services\" />
-    <Folder Include="Common\Interfaces\" />
     <Folder Include="Common\Behaviors\" />
-    <Folder Include="Common\Exceptions\" />
     <Folder Include="CRM\Activities\Commands\" />
     <Folder Include="CRM\Activities\DTOs\" />
     <Folder Include="CRM\Activities\Queries\" />
@@ -29,8 +33,11 @@
     <Folder Include="CRM\Leads\Commands\" />
     <Folder Include="CRM\Leads\DTOs\" />
     <Folder Include="CRM\Leads\Queries\" />
-    <Folder Include="Identity\Validators\" />
     <Folder Include="Identity\Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
   </ItemGroup>
 
 </Project>

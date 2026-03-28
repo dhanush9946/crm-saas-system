@@ -1,5 +1,6 @@
 ﻿
 
+using CRM.Application.Common.Exceptions;
 using CRM.Application.Identity.DTOs.Auth;
 
 namespace CRM.Application.Identity.Commands.Login
@@ -30,7 +31,7 @@ namespace CRM.Application.Identity.Commands.Login
             if (user == null ||
                 !_passwordHasher.Verify(command.Password, user.PasswordHash))
             {
-                throw new Exception("Invalid credentials");
+                throw new UnauthorizedException("Invalid credentials");
             }
 
             if (user.IsDisabled())

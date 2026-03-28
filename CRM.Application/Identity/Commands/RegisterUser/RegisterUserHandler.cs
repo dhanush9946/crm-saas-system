@@ -2,6 +2,8 @@
 
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Domain.Identity.Entities;
+using CRM.Application.Common.Exceptions;
+using FluentValidation;
 
 namespace CRM.Application.Identity.Commands.RegisterUser
 {
@@ -29,12 +31,18 @@ namespace CRM.Application.Identity.Commands.RegisterUser
 
         public async Task<AuthResponseDto> HandleAsync(RegisterUserCommand command)
         {
+            var validator = new RegisterUserValidator();
+            var result = validator.Validate(command);
+
+            if (!result.IsValid)
+                throw new ValidationException(result.Errors);
+
             //checks tenant already existed
             var existingTenant = await _tenantRepository
             .GetBySlugAsync(command.TenantSlug);
 
             if (existingTenant != null)
-                throw new Exception("Tenant slug already exists");
+                throw new ConflictException("Tenant already exists");
 
             //creating Tenant
             var tenant = Tenant.Create(command.TenantName, command.TenantSlug);
