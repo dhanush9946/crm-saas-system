@@ -1,5 +1,6 @@
 ﻿using CRM.Application.Identity.DTOs.Auth;
 using CRM.Domain.Identity.Entities;
+
 using CRM.Application.Common.Exceptions;
 using FluentValidation;
 using CRM.Application.Identity.Interfaces;
@@ -62,7 +63,9 @@ namespace CRM.Application.Identity.Commands.RegisterUser
 
             //save to Db
             await _tenantRepository.AddAsync(tenant);
+            await _tenantRepository.SaveChangesAsync();
             await _userRepository.AddAsync(user);
+            await _userRepository.SaveChangesAsync();
 
             //Token
             var accessToken = _jwtService.GenerateToken(user.Id,
@@ -73,13 +76,14 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             var (rawToken, hash) = _refreshTokenService.Generate();
 
             var refreshTokenEntity = CRM.Domain.Identity.Entities.RefreshToken.Create(
-                                                        tenant.Id,
-                                                        user.Id,
-                                                        hash,
-                                                        DateTime.UtcNow.AddDays(7)
-                                                    );
+                tenant.Id,
+                user.Id,
+                hash,
+                DateTime.UtcNow.AddDays(7)
+            );
 
             await _refreshTokenRepository.AddAsync(refreshTokenEntity);
+            await _refreshTokenRepository.SaveChangesAsync();
 
             return new AuthResponseDto
             {
