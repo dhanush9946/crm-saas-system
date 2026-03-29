@@ -1,9 +1,9 @@
 ﻿
 
 using CRM.Application.Common.Exceptions;
-using CRM.Application.Common.Interfaces;
 using CRM.Application.Identity.Commands.RefreshTokenFloder;
 using CRM.Application.Identity.DTOs.Auth;
+using CRM.Application.Identity.Interfaces;
 
 namespace CRM.Application.Identity.Commands.RefreshToken
 {

@@ -1,7 +1,6 @@
-﻿
-using CRM.Domain.Identity.Entities;
+﻿using CRM.Domain.Identity.Entities;
 
-namespace CRM.Application.Common.Interfaces
+namespace CRM.Application.Identity.Interfaces
 {
     public interface IJwtService
     {

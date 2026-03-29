@@ -3,9 +3,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
-using CRM.Application.Common.Interfaces;
 using CRM.Domain.Identity.Entities;
+using CRM.Application.Identity.Interfaces;
 
 
 

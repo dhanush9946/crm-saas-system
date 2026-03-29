@@ -21,6 +21,7 @@
     <Folder Include="Analytics\Queries\" />
     <Folder Include="Analytics\Services\" />
     <Folder Include="Common\Behaviors\" />
+    <Folder Include="Common\Interfaces\" />
     <Folder Include="CRM\Activities\Commands\" />
     <Folder Include="CRM\Activities\DTOs\" />
     <Folder Include="CRM\Activities\Queries\" />

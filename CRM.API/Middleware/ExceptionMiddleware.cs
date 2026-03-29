@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using CRM.Application.Common.Exceptions;
 
 
 namespace CRM.API.Middleware

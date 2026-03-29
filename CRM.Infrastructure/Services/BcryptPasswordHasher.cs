@@ -1,4 +1,4 @@
-﻿using CRM.Application.Common.Interfaces;
+﻿using CRM.Application.Identity.Interfaces;
 
 
 namespace CRM.Infrastructure.Services

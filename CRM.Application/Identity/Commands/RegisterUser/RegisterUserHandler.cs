@@ -2,8 +2,7 @@
 using CRM.Domain.Identity.Entities;
 using CRM.Application.Common.Exceptions;
 using FluentValidation;
-
-using CRM.Application.Common.Interfaces;
+using CRM.Application.Identity.Interfaces;
 
 namespace CRM.Application.Identity.Commands.RegisterUser
 {

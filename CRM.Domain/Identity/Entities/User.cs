@@ -87,6 +87,11 @@ namespace CRM.Domain.Identity.Entities
             Status = UserStatus.Disabled;
             SetUpdated();
         }
+
+        public bool IsDisabled()
+        {
+            return Status == UserStatus.Disabled; 
+        }
     }
 }
 
