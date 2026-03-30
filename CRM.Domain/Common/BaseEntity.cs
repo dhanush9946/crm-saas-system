@@ -8,7 +8,8 @@ namespace CRM.Domain.Common
         public DateTime CreatedAtUtc { get; protected set; }
         public DateTime? UpdatedAtUtc { get; protected set; }
 
-        public byte[]? RowVersion { get; protected set; }
+        
+        public byte[]? RowVersion { get; protected set; } 
 
         protected BaseEntity()
         {

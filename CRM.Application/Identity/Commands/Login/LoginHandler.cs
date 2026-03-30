@@ -111,6 +111,9 @@ namespace CRM.Application.Identity.Commands.Login
             if (user.IsDisabled())
                 throw new UnauthorizedException("User is disabled");
 
+            user.RecordLogin();
+            await _userRepository.SaveChangesAsync();
+
             // 4. Generate tokens 
             var (accessToken, refreshToken) =
                 await _refreshTokenService.CreateAsync(
