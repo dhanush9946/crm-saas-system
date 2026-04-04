@@ -1,10 +1,10 @@
 ﻿
-using CRM.Application.Identity.DTOs.Auth;
+//using CRM.Application.Identity.DTOs.Auth;
 
-namespace CRM.Application.Identity.Commands.RegisterUser
-{
-    public interface IRegisterUserHandler
-    {
-        Task<AuthResponseDto> HandleAsync(RegisterUserCommand command);
-    }
-}
+//namespace CRM.Application.Identity.Commands.RegisterUser
+//{
+//    public interface IRegisterUserHandler
+//    {
+//        Task<AuthResponseDto> HandleAsync(RegisterUserCommand command);
+//    }
+//}

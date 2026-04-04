@@ -2,6 +2,7 @@
 using CRM.Application.Identity.Commands.RefreshToken;
 using CRM.Application.Identity.Commands.RefreshTokenFloder;
 using CRM.Application.Identity.Commands.RegisterUser;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.API.Controllers.Identity
@@ -10,17 +11,18 @@ namespace CRM.API.Controllers.Identity
     [Route("api/v1/auth")]
     public class AuthController:ControllerBase
     {
+        private readonly IMediator _mediatr;
+
         private readonly IRegisterUserHandler _registerHandler;
-        private readonly ILoginHandler _loginHandler;
         private readonly IRefreshTokenHandler _refreshHandler;
 
         public AuthController(
             IRegisterUserHandler registerHandler,
-            ILoginHandler loginHandler,
+            IMediator mediator,
             IRefreshTokenHandler refreshHandler)
         {
             _registerHandler = registerHandler;
-            _loginHandler = loginHandler;
+            _mediatr=mediator;
             _refreshHandler = refreshHandler;
         }
 
@@ -34,7 +36,7 @@ namespace CRM.API.Controllers.Identity
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginCommand command)
         {
-            var result = await _loginHandler.HandleAsync(command);
+            var result = await _mediatr.Send(command);
             return Ok(result);
         }
 

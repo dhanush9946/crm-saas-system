@@ -15,12 +15,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
 
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(LoginCommand).Assembly);
+});
+
 // Add services to the container.
 builder.Services.AddScoped<IRefreshTokenHandler, RefreshTokenHandler>();
 builder.Services.AddScoped<IRegisterUserHandler, RegisterUserHandler>();
-builder.Services.AddScoped<ILoginHandler, LoginHandler>();
 
-
+//infrastrucrucure dependency
 builder.Services.AddInfrastructure();
 
 builder.Services.AddControllers();
