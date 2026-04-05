@@ -1,8 +1,11 @@
 ﻿
 
-namespace CRM.Application.Identity.Commands.RefreshToken
+using CRM.Application.Identity.DTOs.Auth;
+using MediatR;
+
+namespace CRM.Application.Identity.Commands.RefreshTokenFolder
 {
-    public class RefreshTokenCommand
+    public class RefreshTokenCommand:IRequest<AuthResponseDto>
     {
         public string RefreshToken { get; set; } = default!;
         public string? DeviceId { get; set; }

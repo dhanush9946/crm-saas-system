@@ -9,7 +9,7 @@ namespace CRM.Application.Identity.Interfaces
 
         byte[] Hash(string rawToken);
 
-        Task<RefreshToken?> GetByTokenAsync(string rawToken);
+        Task<RefreshToken?> GetByTokenAsync(string rawToken,CancellationToken cancellationToken);
 
         Task<(string accessToken, string refreshToken)> CreateAsync(
             Guid tenantId,
@@ -17,7 +17,8 @@ namespace CRM.Application.Identity.Interfaces
             string email,
             string? deviceId,
             string? userAgent,
-            string? ipAddress
+            string? ipAddress,
+            CancellationToken cancellationToken
         );
 
         Task<AuthResponseDto> RotateAsync(
@@ -27,7 +28,8 @@ namespace CRM.Application.Identity.Interfaces
             string email,
             string? deviceId,
             string? userAgent,
-            string? ipAddress
+            string? ipAddress,
+            CancellationToken cancellationToken
         );
     }
 }

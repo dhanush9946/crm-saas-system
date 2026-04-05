@@ -1,13 +1,13 @@
 ﻿
 
 using CRM.Application.Common.Exceptions;
-using CRM.Application.Identity.Commands.RefreshTokenFloder;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Interfaces;
+using MediatR;
 
-namespace CRM.Application.Identity.Commands.RefreshToken
+namespace CRM.Application.Identity.Commands.RefreshTokenFolder
 {
-    public class RefreshTokenHandler:IRefreshTokenHandler
+    public class RefreshTokenHandler:IRequestHandler<RefreshTokenCommand,AuthResponseDto>
     {
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IUserRepository _userRepository;
@@ -20,15 +20,13 @@ namespace CRM.Application.Identity.Commands.RefreshToken
             _userRepository = userRepository;
         }
 
-        public async Task<AuthResponseDto> HandleAsync(RefreshTokenCommand command)
+        public async Task<AuthResponseDto> Handle(RefreshTokenCommand request,CancellationToken cancellationToken)
         {
-            // 1. Validate input
-            if (string.IsNullOrWhiteSpace(command.RefreshToken))
-                throw new BadRequestException("Refresh token is required");
+            
 
             // 2. Get token from DB
             var existingToken = await _refreshTokenService
-                .GetByTokenAsync(command.RefreshToken);
+                .GetByTokenAsync(request.RefreshToken,cancellationToken);
 
             if (existingToken == null)
                 throw new UnauthorizedException("Invalid refresh token");
@@ -38,7 +36,7 @@ namespace CRM.Application.Identity.Commands.RefreshToken
                 throw new UnauthorizedException("Refresh token expired or revoked");
 
             // 4. Get user (for email)
-            var user = await _userRepository.GetByIdAsync(existingToken.UserId);
+            var user = await _userRepository.GetByIdAsync(existingToken.UserId,cancellationToken);
 
             if (user == null)
                 throw new UnauthorizedException("User not found");
@@ -49,9 +47,10 @@ namespace CRM.Application.Identity.Commands.RefreshToken
                 user.TenantId,
                 user.Id,
                 user.Email, 
-                command.DeviceId,
-                command.UserAgent,
-                command.IpAddress
+                request.DeviceId,
+                request.UserAgent,
+                request.IpAddress,
+                cancellationToken
             );
 
             return result;

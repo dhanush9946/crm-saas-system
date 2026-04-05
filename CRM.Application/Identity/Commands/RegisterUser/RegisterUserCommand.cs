@@ -1,8 +1,11 @@
 ﻿
 
+using CRM.Application.Identity.DTOs.Auth;
+using MediatR;
+
 namespace CRM.Application.Identity.Commands.RegisterUser
 {
-    public class RegisterUserCommand
+    public class RegisterUserCommand:IRequest<AuthResponseDto>
     {
         public string TenantName { get; set; } = null!;
         public string TenantSlug { get; set; } = null!;

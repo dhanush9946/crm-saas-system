@@ -6,10 +6,10 @@ namespace CRM.Application.Identity.Interfaces
 {
     public interface IRefreshTokenRepository
     {
-        Task<RefreshToken?> GetByHashAsync(byte[] hash);
+        Task<RefreshToken?> GetByHashAsync(byte[] hash,CancellationToken cancellationToken);
 
-        Task AddAsync(RefreshToken token);
+        Task AddAsync(RefreshToken token,CancellationToken cancellationToken);
 
-        Task SaveChangesAsync();
+        Task SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

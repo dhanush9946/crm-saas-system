@@ -16,20 +16,20 @@ namespace CRM.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<RefreshToken?> GetByHashAsync(byte[] hash)
+        public async Task<RefreshToken?> GetByHashAsync(byte[] hash,CancellationToken cancellationToken)
         {
             return await _context.RefreshTokens
-                .FirstOrDefaultAsync(x => x.TokenHash == hash);
+                .FirstOrDefaultAsync(x => x.TokenHash == hash,cancellationToken);
         }
 
-        public async Task AddAsync(RefreshToken token)
+        public async Task AddAsync(RefreshToken token,CancellationToken cancellationToken)
         {
-            await _context.RefreshTokens.AddAsync(token);
+            await _context.RefreshTokens.AddAsync(token,cancellationToken);
         }
 
-        public async Task SaveChangesAsync()
+        public async Task SaveChangesAsync(CancellationToken cancellationToken)
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

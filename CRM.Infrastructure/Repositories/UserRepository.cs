@@ -16,28 +16,29 @@ namespace CRM.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<User?> GetByIdAsync(Guid id)
+        public async Task<User?> GetByIdAsync(Guid id,CancellationToken cancellationToken)
         {
             return await _context.Users
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == id,cancellationToken);
         }
 
-        public async Task<User?> GetByEmailAsync(Guid tenantId, string email)
+        public async Task<User?> GetByEmailAsync(Guid tenantId, string email,CancellationToken cancellationToken)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(x =>
                     x.TenantId == tenantId &&
-                    x.Email == email);
+                    x.Email == email,
+                    cancellationToken);
         }
 
-        public async Task AddAsync(User user)
+        public async Task AddAsync(User user,CancellationToken cancellationToken)
         {
-            await _context.Users.AddAsync(user);
+            await _context.Users.AddAsync(user,cancellationToken);
         }
 
-        public async Task SaveChangesAsync()
+        public async Task SaveChangesAsync(CancellationToken cancellationToken)
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
     }

@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Identity\Validators\**" />
-    <EmbeddedResource Remove="Identity\Validators\**" />
-    <None Remove="Identity\Validators\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\CRM.Domain\CRM.Domain.csproj" />
   </ItemGroup>
 
@@ -40,7 +34,6 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
   </ItemGroup>
 
 </Project>

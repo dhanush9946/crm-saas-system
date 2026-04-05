@@ -28,13 +28,13 @@ namespace CRM.Application.Identity.Commands.Login
         public async Task<AuthResponseDto> Handle(LoginCommand reuquest,CancellationToken cancellationToken)
         {
             // 1. Get tenant
-            var tenant = await _tenantRepository.GetBySlugAsync(reuquest.TenantSlug);
+            var tenant = await _tenantRepository.GetBySlugAsync(reuquest.TenantSlug,cancellationToken);
 
             if (tenant == null)
                 throw new UnauthorizedException("Invalid tenant");
 
             // 2. Get user
-            var user = await _userRepository.GetByEmailAsync(tenant.Id, reuquest.Email);
+            var user = await _userRepository.GetByEmailAsync(tenant.Id, reuquest.Email,cancellationToken);
 
             if (user == null || user.PasswordHash == null ||
                 !_passwordHasher.Verify(reuquest.Password, user.PasswordHash))
@@ -47,7 +47,7 @@ namespace CRM.Application.Identity.Commands.Login
                 throw new UnauthorizedException("User is disabled");
 
             user.RecordLogin();
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.SaveChangesAsync(cancellationToken);
 
             // 4. Generate tokens 
             var (accessToken, refreshToken) =
@@ -57,7 +57,8 @@ namespace CRM.Application.Identity.Commands.Login
                     user.Email,
                     reuquest.DeviceId,
                     null,
-                    null
+                    null,
+                    cancellationToken
                 );
 
             // 5. Response
