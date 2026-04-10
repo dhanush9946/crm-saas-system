@@ -1,8 +1,10 @@
 using CRM.API.Middleware;
 using CRM.Application.Common;
+using CRM.Application.Common.Behaviors;
 using CRM.Infrastructure;
 using CRM.Infrastructure.Persistence;
 using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -22,10 +24,16 @@ builder.Services.AddMediatR(cfg =>
 //Registering Fluent Validation
 builder.Services.AddValidatorsFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
 
+//Register Validation Behaviour
+builder.Services.AddTransient(
+    typeof(IPipelineBehavior<,>),
+    typeof(ValidationBehavior<,>)
+);
+
 // Add services to the container.
 
-    //infrastrucrucure dependency
-    builder.Services.AddInfrastructure();
+//infrastrucrucure dependency
+builder.Services.AddInfrastructure();
 
 
 builder.Services.AddControllers();
