@@ -1,6 +1,8 @@
-﻿using CRM.Application.Identity.Commands.Login;
+﻿using CRM.API.Responses;
+using CRM.Application.Identity.Commands.Login;
 using CRM.Application.Identity.Commands.RefreshTokenFolder;
 using CRM.Application.Identity.Commands.RegisterUser;
+using CRM.Application.Identity.DTOs.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,21 +24,30 @@ namespace CRM.API.Controllers.Identity
         public async Task<IActionResult> Register(RegisterUserCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediatr.Send(command, cancellationToken);
-            return Ok(result);
+
+            var traceId = HttpContext.TraceIdentifier;
+
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediatr.Send(command, cancellationToken);
-            return Ok(result);
+
+            var traceId = HttpContext.TraceIdentifier;
+
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
         }
 
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediatr.Send(command, cancellationToken);
-            return Ok(result);
+
+            var traceId = HttpContext.TraceIdentifier;
+
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
         }
     }
 }
