@@ -1,4 +1,4 @@
-﻿using CRM.Application.Identity.DTOs.Auth;
+using CRM.Application.Identity.DTOs.Auth;
 using CRM.Domain.Identity.Entities;
 
 namespace CRM.Application.Identity.Interfaces
@@ -11,21 +11,19 @@ namespace CRM.Application.Identity.Interfaces
 
         Task<RefreshToken?> GetByTokenAsync(string rawToken,CancellationToken cancellationToken);
 
-        Task<(string accessToken, string refreshToken)> CreateAsync(
+        Task<string> CreateAsync(
             Guid tenantId,
             Guid userId,
-            string email,
             string? deviceId,
             string? userAgent,
             string? ipAddress,
             CancellationToken cancellationToken
         );
 
-        Task<AuthResponseDto> RotateAsync(
+        Task<string> RotateAsync(
             RefreshToken existingToken,
             Guid tenantId,
             Guid userId,
-            string email,
             string? deviceId,
             string? userAgent,
             string? ipAddress,

@@ -1,19 +1,21 @@
-﻿
+﻿using CRM.Domain.Common;
 
 namespace CRM.Domain.Identity.Entities
 {
-    public class UserRole
+    public class UserRole : BaseEntity
     {
         public Guid TenantId { get; private set; }
 
         public Guid UserId { get; private set; }
-
         public Guid RoleId { get; private set; }
 
-        
+        // Optional navigation
+        public User User { get; private set; } = default!;
+        public Role Role { get; private set; } = default!;
+
         private UserRole() { }
 
-        public UserRole(Guid tenantId, Guid userId, Guid roleId)
+        private UserRole(Guid tenantId, Guid userId, Guid roleId)
         {
             if (tenantId == Guid.Empty)
                 throw new ArgumentException("TenantId is required");
@@ -27,6 +29,11 @@ namespace CRM.Domain.Identity.Entities
             TenantId = tenantId;
             UserId = userId;
             RoleId = roleId;
+        }
+
+        public static UserRole Create(Guid tenantId, Guid userId, Guid roleId)
+        {
+            return new UserRole(tenantId, userId, roleId);
         }
     }
 }

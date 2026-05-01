@@ -1,9 +1,10 @@
-﻿
+
 
 using CRM.Application.Common.Exceptions;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Interfaces;
 using CRM.Domain.Identity.Entities;
+using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -12,14 +13,14 @@ namespace CRM.Infrastructure.Services
     public class RefreshTokenService : IRefreshTokenService
     {
         private readonly IRefreshTokenRepository _repository;
-        private readonly IJwtService _jwtService;
+        private readonly IConfiguration _config;
 
         public RefreshTokenService(
             IRefreshTokenRepository repository,
-            IJwtService jwtService)
+            IConfiguration config)
         {
             _repository = repository;
-            _jwtService = jwtService;
+            _config = config;
         }
 
         // Generate raw + hash
@@ -45,11 +46,10 @@ namespace CRM.Infrastructure.Services
             return await _repository.GetByHashAsync(hash,cancellationToken);
         }
 
-        // CREATE (Used in LOGIN)
-        public async Task<(string accessToken, string refreshToken)> CreateAsync(
+        // CREATE
+        public async Task<string> CreateAsync(
             Guid tenantId,
             Guid userId,
-            string email,
             string? deviceId,
             string? userAgent,
             string? ipAddress,
@@ -59,11 +59,12 @@ namespace CRM.Infrastructure.Services
             var (rawToken, hash) = Generate();
 
             // 2. Create entity
+            var expirationDays = Convert.ToDouble(_config["Jwt:RefreshTokenExpirationDays"] ?? "7");
             var refreshToken = RefreshToken.Create(
                 tenantId,
                 userId,
                 hash,
-                DateTime.UtcNow.AddDays(7),
+                DateTime.UtcNow.AddDays(expirationDays),
                 deviceId,
                 userAgent,
                 ipAddress
@@ -71,20 +72,15 @@ namespace CRM.Infrastructure.Services
 
             // 3. Save
             await _repository.AddAsync(refreshToken,cancellationToken);
-            await _repository.SaveChangesAsync(cancellationToken); 
 
-            // 4. Generate access token
-            var accessToken = _jwtService.GenerateToken(userId, tenantId, email);
-
-            return (accessToken, rawToken);
+            return rawToken;
         }
 
         //  ROTATE (Used in REFRESH)
-        public async Task<AuthResponseDto> RotateAsync(
+        public async Task<string> RotateAsync(
             RefreshToken existingToken,
             Guid tenantId,
             Guid userId,
-            string email,
             string? deviceId,
             string? userAgent,
             string? ipAddress,
@@ -96,11 +92,12 @@ namespace CRM.Infrastructure.Services
             // 1. Generate new token
             var (newRawToken, newHash) = Generate(); 
 
+            var expirationDays = Convert.ToDouble(_config["Jwt:RefreshTokenExpirationDays"] ?? "7");
             var newToken = RefreshToken.Create(
                 tenantId,
                 userId,
                 newHash,
-                DateTime.UtcNow.AddDays(7),
+                DateTime.UtcNow.AddDays(expirationDays),
                 deviceId,
                 userAgent,
                 ipAddress
@@ -111,18 +108,8 @@ namespace CRM.Infrastructure.Services
 
             // 3. Save new token
             await _repository.AddAsync(newToken,cancellationToken);
-            await _repository.SaveChangesAsync(cancellationToken); 
 
-            // 4. Generate new access token
-            var accessToken = _jwtService.GenerateToken(userId, tenantId, email);
-
-            return new AuthResponseDto
-            {
-                TenantId = tenantId,
-                UserId = userId,
-                AccessToken = accessToken,
-                RefreshToken = newRawToken
-            };
+            return newRawToken;
         }
     }
 }

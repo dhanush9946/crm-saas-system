@@ -1,8 +1,9 @@
-﻿
+
 
 using CRM.Application.Common.Exceptions;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Interfaces;
+using CRM.Application.Common.Interfaces;
 using MediatR;
 
 namespace CRM.Application.Identity.Commands.RefreshTokenFolder
@@ -11,13 +12,22 @@ namespace CRM.Application.Identity.Commands.RefreshTokenFolder
     {
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IUserRepository _userRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IJwtService _jwtService;
+        private readonly IUnitOfWork _unitOfWork;
 
         public RefreshTokenHandler(
             IRefreshTokenService refreshTokenService,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IUserRoleRepository userRoleRepository,
+            IJwtService jwtService,
+            IUnitOfWork unitOfWork)
         {
             _refreshTokenService = refreshTokenService;
             _userRepository = userRepository;
+            _userRoleRepository = userRoleRepository;
+            _jwtService = jwtService;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<AuthResponseDto> Handle(RefreshTokenCommand request,CancellationToken cancellationToken)
@@ -41,19 +51,32 @@ namespace CRM.Application.Identity.Commands.RefreshTokenFolder
             if (user == null)
                 throw new UnauthorizedException("User not found");
 
-            // 5. Rotate token
-            var result = await _refreshTokenService.RotateAsync(
+            // 5. Fetch roles
+            var roles = await _userRoleRepository.GetUserRolesAsync(user.TenantId, user.Id, cancellationToken);
+
+            // 6. Generate new access token
+            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, roles);
+
+            // 7. Rotate token
+            var newRawToken = await _refreshTokenService.RotateAsync(
                 existingToken,
                 user.TenantId,
                 user.Id,
-                user.Email, 
                 request.DeviceId,
                 request.UserAgent,
                 request.IpAddress,
                 cancellationToken
             );
 
-            return result;
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return new AuthResponseDto
+            {
+                TenantId = user.TenantId,
+                UserId = user.Id,
+                AccessToken = accessToken,
+                RefreshToken = newRawToken
+            };
         }
 
     }
