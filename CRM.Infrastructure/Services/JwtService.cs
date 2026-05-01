@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -19,14 +19,22 @@ namespace CRM.Infrastructure.Services
             _config = config;
         }
 
-        public string GenerateToken(Guid userId, Guid tenantId, string email)
+        public string GenerateToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
-        new Claim("sub", userId.ToString()),
-        new Claim("tid", tenantId.ToString()),
-        new Claim("email", email)
-    };
+                new Claim("sub", userId.ToString()),
+                new Claim("tid", tenantId.ToString()),
+                new Claim("email", email)
+            };
+
+            if (roles != null)
+            {
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+            }
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)

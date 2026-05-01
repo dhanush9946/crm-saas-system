@@ -1,7 +1,8 @@
-﻿
+
 using CRM.Application.Common.Exceptions;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Interfaces;
+using CRM.Application.Common.Interfaces;
 using MediatR;
 
 namespace CRM.Application.Identity.Commands.Login
@@ -12,32 +13,41 @@ namespace CRM.Application.Identity.Commands.Login
         private readonly IPasswordHasher _passwordHasher;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly ITenantRepository _tenantRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IJwtService _jwtService;
+        private readonly IUnitOfWork _unitOfWork;
 
         public LoginHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
             IRefreshTokenService refreshTokenService,
-            ITenantRepository tenantRepository)
+            ITenantRepository tenantRepository,
+            IUserRoleRepository userRoleRepository,
+            IJwtService jwtService,
+            IUnitOfWork unitOfWork)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _refreshTokenService = refreshTokenService;
             _tenantRepository = tenantRepository;
+            _userRoleRepository = userRoleRepository;
+            _jwtService = jwtService;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task<AuthResponseDto> Handle(LoginCommand reuquest,CancellationToken cancellationToken)
+        public async Task<AuthResponseDto> Handle(LoginCommand request,CancellationToken cancellationToken)
         {
             // 1. Get tenant
-            var tenant = await _tenantRepository.GetBySlugAsync(reuquest.TenantSlug,cancellationToken);
+            var tenant = await _tenantRepository.GetBySlugAsync(request.TenantSlug,cancellationToken);
 
             if (tenant == null)
                 throw new UnauthorizedException("Invalid tenant");
 
             // 2. Get user
-            var user = await _userRepository.GetByEmailAsync(tenant.Id, reuquest.Email,cancellationToken);
+            var user = await _userRepository.GetByEmailAsync(tenant.Id, request.Email,cancellationToken);
 
             if (user == null || user.PasswordHash == null ||
-                !_passwordHasher.Verify(reuquest.Password, user.PasswordHash))
+                !_passwordHasher.Verify(request.Password, user.PasswordHash))
             {
                 throw new UnauthorizedException("Invalid credentials");
             }
@@ -47,19 +57,23 @@ namespace CRM.Application.Identity.Commands.Login
                 throw new UnauthorizedException("User is disabled");
 
             user.RecordLogin();
-            await _userRepository.SaveChangesAsync(cancellationToken);
 
-            // 4. Generate tokens 
-            var (accessToken, refreshToken) =
-                await _refreshTokenService.CreateAsync(
+            // 4. Fetch roles
+            var roles = await _userRoleRepository.GetUserRolesAsync(user.TenantId, user.Id, cancellationToken);
+
+            // 5. Generate tokens 
+            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, roles);
+            
+            var refreshToken = await _refreshTokenService.CreateAsync(
                     user.TenantId,
                     user.Id,
-                    user.Email,
-                    reuquest.DeviceId,
+                    request.DeviceId,
                     null,
                     null,
                     cancellationToken
                 );
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 5. Response
             return new AuthResponseDto

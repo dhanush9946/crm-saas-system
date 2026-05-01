@@ -2,18 +2,20 @@
 
 namespace CRM.Domain.Identity.Entities
 {
-    public class Role:BaseEntity
+    public class Role : BaseEntity
     {
         public Guid TenantId { get; private set; }
 
         public string Name { get; private set; } = default!;
         public string NameNormalized { get; private set; } = default!;
 
-        public bool IsSystemRole { get; private set; } = false;
+        public bool IsSystemRole { get; private set; }
+
+        public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
 
         private Role() { }
 
-        public Role(Guid tenantId, string name, bool isSystemRole = false)
+        private Role(Guid tenantId, string name, bool isSystemRole)
         {
             if (tenantId == Guid.Empty)
                 throw new ArgumentException("TenantId is required");
@@ -23,6 +25,11 @@ namespace CRM.Domain.Identity.Entities
             IsSystemRole = isSystemRole;
         }
 
+        public static Role Create(Guid tenantId, string name, bool isSystemRole = false)
+        {
+            return new Role(tenantId, name, isSystemRole);
+        }
+
         public void SetName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -30,7 +37,13 @@ namespace CRM.Domain.Identity.Entities
 
             Name = name.Trim();
             NameNormalized = name.Trim().ToUpperInvariant();
+
             SetUpdated();
+        }
+
+        public bool IsOwner()
+        {
+            return NameNormalized == "OWNER";
         }
     }
 }

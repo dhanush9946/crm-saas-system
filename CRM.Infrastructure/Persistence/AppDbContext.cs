@@ -1,4 +1,4 @@
-﻿using CRM.Domain.Common;
+using CRM.Domain.Common;
 using CRM.Domain.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -18,6 +18,9 @@ namespace CRM.Infrastructure.Persistence
 
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+        public DbSet<Role> Roles => Set<Role>();
+        public DbSet<UserRole> UserRoles => Set<UserRole>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +34,7 @@ namespace CRM.Infrastructure.Persistence
                 {
                     var property = modelBuilder.Entity(entity.ClrType)
                         .Property(nameof(BaseEntity.RowVersion))
+                        .IsRequired()
                         .IsRowVersion()
                         .ValueGeneratedOnAddOrUpdate();
 

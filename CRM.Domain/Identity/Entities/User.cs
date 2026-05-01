@@ -20,6 +20,9 @@ namespace CRM.Domain.Identity.Entities
 
         public DateTime? LastLoginAtUtc { get; private set; }
 
+        
+        public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
+
 
         private User() { }
 

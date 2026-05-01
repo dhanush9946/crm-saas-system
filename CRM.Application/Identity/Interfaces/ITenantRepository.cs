@@ -1,17 +1,11 @@
-﻿
+
 
 using CRM.Domain.Identity.Entities;
 
 namespace CRM.Application.Identity.Interfaces
 {
-    public interface ITenantRepository
+    public interface ITenantRepository : IRepository<Tenant>
     {
-        Task<Tenant?> GetByIdAsync(Guid id,CancellationToken cancellationToken);
-
         Task<Tenant?> GetBySlugAsync(string slug,CancellationToken cancellationToken);
-
-        Task AddAsync(Tenant tenant,CancellationToken cancellationToken);
-
-        Task SaveChangesAsync(CancellationToken cancellationToken);
     }
 }
