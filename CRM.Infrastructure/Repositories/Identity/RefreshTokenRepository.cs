@@ -16,5 +16,12 @@ namespace CRM.Infrastructure.Repositories.Identity
             return await _context.RefreshTokens
                 .FirstOrDefaultAsync(x => x.TokenHash == hash,cancellationToken);
         }
+
+        public async Task<List<RefreshToken>> GetByFamilyIdAsync(Guid tokenFamilyId, CancellationToken cancellationToken)
+        {
+            return await _context.RefreshTokens
+                .Where(x => x.TokenFamilyId == tokenFamilyId)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

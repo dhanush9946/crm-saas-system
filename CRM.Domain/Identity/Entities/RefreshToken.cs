@@ -78,6 +78,31 @@ namespace CRM.Domain.Identity.Entities
             );
         }
 
+        public static RefreshToken CreateInFamily(
+                    Guid tenantId,
+                    Guid userId,
+                    byte[] tokenHash,
+                    Guid tokenFamilyId,
+                    DateTime expiresAtUtc,
+                    string? deviceId = null,
+                    string? userAgent = null,
+                    string? ipAddress = null)
+        {
+            if (tokenFamilyId == Guid.Empty)
+                throw new ArgumentException("TokenFamilyId is required");
+
+            return new RefreshToken(
+                tenantId,
+                userId,
+                tokenHash,
+                tokenFamilyId,
+                expiresAtUtc,
+                deviceId,
+                userAgent,
+                ipAddress
+            );
+        }
+
         public void Revoke(Guid? replacedByTokenId = null)
         {
             RevokedAtUtc = DateTime.UtcNow;
