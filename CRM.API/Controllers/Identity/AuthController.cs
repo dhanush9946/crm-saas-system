@@ -1,9 +1,11 @@
 ﻿using CRM.API.Responses;
 using CRM.Application.Identity.Commands.Login;
+using CRM.Application.Identity.Commands.Logout;
 using CRM.Application.Identity.Commands.RefreshTokenFolder;
 using CRM.Application.Identity.Commands.RegisterUser;
 using CRM.Application.Identity.DTOs.Auth;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.API.Controllers.Identity
@@ -40,6 +42,7 @@ namespace CRM.API.Controllers.Identity
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
         }
 
+        [AllowAnonymous]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenCommand command, CancellationToken cancellationToken)
         {
@@ -48,6 +51,17 @@ namespace CRM.API.Controllers.Identity
             var traceId = HttpContext.TraceIdentifier;
 
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
+        }
+
+        [AllowAnonymous]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(LogoutCommand command, CancellationToken cancellationToken)
+        {
+            command.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            await _mediatr.Send(command, cancellationToken);
+
+            return NoContent();
         }
     }
 }

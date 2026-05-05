@@ -3,14 +3,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CRM.Domain.Identity.Entities;
 using CRM.Application.Identity.Interfaces;
-
-
 
 namespace CRM.Infrastructure.Services
 {
-    public class JwtService:IJwtService
+    public class JwtService : IJwtService
     {
         private readonly IConfiguration _config;
 
@@ -19,35 +16,41 @@ namespace CRM.Infrastructure.Services
             _config = config;
         }
 
-        public string GenerateToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles)
+        public string GenerateToken(
+            Guid userId,
+            Guid tenantId,
+            string email,
+            IEnumerable<string> roles)
         {
             var claims = new List<Claim>
             {
-                new Claim("sub", userId.ToString()),
-                new Claim("tid", tenantId.ToString()),
-                new Claim("email", email)
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),   
+                new Claim("tenantId", tenantId.ToString()),                   
+                new Claim(JwtRegisteredClaimNames.Email, email)
             };
 
             if (roles != null)
             {
-                foreach (var role in roles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                }
+                claims.AddRange(
+                    roles.Select(role => new Claim(ClaimTypes.Role, role))
+                );
             }
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
             );
 
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var credentials = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            );
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(15),
-                signingCredentials: creds
+                signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);

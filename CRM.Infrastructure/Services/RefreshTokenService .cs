@@ -93,10 +93,11 @@ namespace CRM.Infrastructure.Services
             var (newRawToken, newHash) = Generate(); 
 
             var expirationDays = Convert.ToDouble(_config["Jwt:RefreshTokenExpirationDays"] ?? "7");
-            var newToken = RefreshToken.Create(
+            var newToken = RefreshToken.CreateInFamily(
                 tenantId,
                 userId,
                 newHash,
+                existingToken.TokenFamilyId,
                 DateTime.UtcNow.AddDays(expirationDays),
                 deviceId,
                 userAgent,
