@@ -112,5 +112,17 @@ namespace CRM.Infrastructure.Services
 
             return newRawToken;
         }
+
+        public async Task RevokeFamilyAsync(
+            Guid tokenFamilyId,
+            CancellationToken cancellationToken)
+        {
+            var tokenFamily = await _repository.GetByFamilyIdAsync(tokenFamilyId, cancellationToken);
+
+            foreach (var token in tokenFamily.Where(token => token.IsActive()))
+            {
+                token.Revoke();
+            }
+        }
     }
 }

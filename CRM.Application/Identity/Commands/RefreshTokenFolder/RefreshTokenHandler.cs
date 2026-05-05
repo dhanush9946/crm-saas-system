@@ -5,6 +5,7 @@ using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Interfaces;
 using CRM.Application.Common.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace CRM.Application.Identity.Commands.RefreshTokenFolder
 {
@@ -15,19 +16,22 @@ namespace CRM.Application.Identity.Commands.RefreshTokenFolder
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IJwtService _jwtService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<RefreshTokenHandler> _logger;
 
         public RefreshTokenHandler(
             IRefreshTokenService refreshTokenService,
             IUserRepository userRepository,
             IUserRoleRepository userRoleRepository,
             IJwtService jwtService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILogger<RefreshTokenHandler> logger)
         {
             _refreshTokenService = refreshTokenService;
             _userRepository = userRepository;
             _userRoleRepository = userRoleRepository;
             _jwtService = jwtService;
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task<AuthResponseDto> Handle(RefreshTokenCommand request,CancellationToken cancellationToken)
@@ -43,7 +47,29 @@ namespace CRM.Application.Identity.Commands.RefreshTokenFolder
 
             // 3. Validate token state
             if (!existingToken.IsActive())
+            {
+                if (existingToken.IsRevoked() && existingToken.ReplacedByTokenId.HasValue)
+                {
+                    await _refreshTokenService.RevokeFamilyAsync(
+                        existingToken.TokenFamilyId,
+                        cancellationToken);
+
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                    _logger.LogWarning(
+                        "Refresh token reuse detected. TokenId: {TokenId}, TokenFamilyId: {TokenFamilyId}, UserId: {UserId}, TenantId: {TenantId}, IP: {IpAddress}, DeviceId: {DeviceId}",
+                        existingToken.Id,
+                        existingToken.TokenFamilyId,
+                        existingToken.UserId,
+                        existingToken.TenantId,
+                        request.IpAddress,
+                        request.DeviceId);
+
+                    throw new UnauthorizedException("Refresh token reuse detected");
+                }
+
                 throw new UnauthorizedException("Refresh token expired or revoked");
+            }
 
             // 4. Get user (for email)
             var user = await _userRepository.GetByIdAsync(existingToken.UserId,cancellationToken);
