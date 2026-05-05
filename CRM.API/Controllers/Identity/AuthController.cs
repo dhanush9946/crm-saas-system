@@ -43,6 +43,7 @@ namespace CRM.API.Controllers.Identity
         }
 
         [AllowAnonymous]
+
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenCommand command, CancellationToken cancellationToken)
         {

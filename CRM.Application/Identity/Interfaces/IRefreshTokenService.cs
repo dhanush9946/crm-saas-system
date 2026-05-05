@@ -29,5 +29,10 @@ namespace CRM.Application.Identity.Interfaces
             string? ipAddress,
             CancellationToken cancellationToken
         );
+
+        Task RevokeFamilyAsync(
+            Guid tokenFamilyId,
+            CancellationToken cancellationToken
+        );
     }
 }
