@@ -93,10 +93,11 @@ namespace CRM.Infrastructure.Services
             var (newRawToken, newHash) = Generate(); 
 
             var expirationDays = Convert.ToDouble(_config["Jwt:RefreshTokenExpirationDays"] ?? "7");
-            var newToken = RefreshToken.Create(
+            var newToken = RefreshToken.CreateInFamily(
                 tenantId,
                 userId,
                 newHash,
+                existingToken.TokenFamilyId,
                 DateTime.UtcNow.AddDays(expirationDays),
                 deviceId,
                 userAgent,
@@ -110,6 +111,18 @@ namespace CRM.Infrastructure.Services
             await _repository.AddAsync(newToken,cancellationToken);
 
             return newRawToken;
+        }
+
+        public async Task RevokeFamilyAsync(
+            Guid tokenFamilyId,
+            CancellationToken cancellationToken)
+        {
+            var tokenFamily = await _repository.GetByFamilyIdAsync(tokenFamilyId, cancellationToken);
+
+            foreach (var token in tokenFamily.Where(token => token.IsActive()))
+            {
+                token.Revoke();
+            }
         }
     }
 }

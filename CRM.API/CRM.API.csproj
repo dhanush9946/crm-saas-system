@@ -31,7 +31,6 @@
     <Folder Include="Controllers\Activities\" />
     <Folder Include="Controllers\Analytics\" />
     <Folder Include="Filters\" />
-    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>
