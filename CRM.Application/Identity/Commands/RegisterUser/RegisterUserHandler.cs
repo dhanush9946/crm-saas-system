@@ -99,7 +99,7 @@ namespace CRM.Application.Identity.Commands.RegisterUser
 
             // 8. Generate tokens
             var roles = new List<string> { roleName };
-            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, roles);
+            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, user.TokenVersion, roles);
 
             var refreshToken = await _refreshTokenService.CreateAsync(
                     user.TenantId,

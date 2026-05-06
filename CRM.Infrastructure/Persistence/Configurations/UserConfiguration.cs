@@ -21,6 +21,10 @@ namespace CRM.Infrastructure.Persistence.Configurations
             builder.Property(x => x.PasswordHash)
                 .HasMaxLength(500);
 
+            builder.Property(x => x.TokenVersion)
+                .IsRequired()
+                .HasDefaultValue(1);
+
             // Multi-tenant unique email
             builder.HasIndex(x => new { x.TenantId, x.Email })
                 .IsUnique();

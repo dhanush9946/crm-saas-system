@@ -81,7 +81,7 @@ namespace CRM.Application.Identity.Commands.RefreshTokenFolder
             var roles = await _userRoleRepository.GetUserRolesAsync(user.TenantId, user.Id, cancellationToken);
 
             // 6. Generate new access token
-            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, roles);
+            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, user.TokenVersion, roles);
 
             // 7. Rotate token
             var newRawToken = await _refreshTokenService.RotateAsync(

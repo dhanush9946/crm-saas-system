@@ -62,7 +62,7 @@ namespace CRM.Application.Identity.Commands.Login
             var roles = await _userRoleRepository.GetUserRolesAsync(user.TenantId, user.Id, cancellationToken);
 
             // 5. Generate tokens 
-            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, roles);
+            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, user.TokenVersion, roles);
             
             var refreshToken = await _refreshTokenService.CreateAsync(
                     user.TenantId,
