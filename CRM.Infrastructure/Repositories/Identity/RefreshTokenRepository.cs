@@ -23,5 +23,19 @@ namespace CRM.Infrastructure.Repositories.Identity
                 .Where(x => x.TokenFamilyId == tokenFamilyId)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<List<RefreshToken>> GetActiveByUserAsync(
+            Guid tenantId,
+            Guid userId,
+            CancellationToken cancellationToken)
+        {
+            return await _context.RefreshTokens
+                .Where(x =>
+                    x.TenantId == tenantId &&
+                    x.UserId == userId &&
+                    x.RevokedAtUtc == null &&
+                    x.ExpiresAtUtc > DateTime.UtcNow)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

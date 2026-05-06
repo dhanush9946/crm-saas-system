@@ -13,10 +13,10 @@ namespace CRM.API.Extensions
                 {
                     Name = "Authorization",
                     Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
+                    Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Enter JWT like: Bearer {your token}"
+                    Description = "Enter only the JWT access token. Swagger adds the Bearer prefix automatically."
                 });
 
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
