@@ -1,12 +1,15 @@
 ﻿using CRM.API.Responses;
+using CRM.Application.Common.Exceptions;
 using CRM.Application.Identity.Commands.Login;
 using CRM.Application.Identity.Commands.Logout;
+using CRM.Application.Identity.Commands.LogoutAll;
 using CRM.Application.Identity.Commands.RefreshTokenFolder;
 using CRM.Application.Identity.Commands.RegisterUser;
 using CRM.Application.Identity.DTOs.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CRM.API.Controllers.Identity
 {
@@ -21,7 +24,7 @@ namespace CRM.API.Controllers.Identity
         {
             _mediatr = mediator;
         }
-
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterUserCommand command, CancellationToken cancellationToken)
         {
@@ -31,7 +34,7 @@ namespace CRM.API.Controllers.Identity
 
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
         }
-
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginCommand command, CancellationToken cancellationToken)
         {
@@ -43,7 +46,6 @@ namespace CRM.API.Controllers.Identity
         }
 
         [AllowAnonymous]
-
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenCommand command, CancellationToken cancellationToken)
         {
@@ -63,6 +65,36 @@ namespace CRM.API.Controllers.Identity
             await _mediatr.Send(command, cancellationToken);
 
             return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("logout-all")]
+        public async Task<IActionResult> LogoutAll(LogoutAllRequest? request, CancellationToken cancellationToken)
+        {
+            var command = new LogoutAllCommand
+            {
+                UserId = GetRequiredGuidClaim(ClaimTypes.NameIdentifier, "sub"),
+                TenantId = GetRequiredGuidClaim("tenantId"),
+                DeviceId = request?.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
+            };
+
+            await _mediatr.Send(command, cancellationToken);
+
+            return NoContent();
+        }
+
+        private Guid GetRequiredGuidClaim(params string[] claimTypes)
+        {
+            foreach (var claimType in claimTypes)
+            {
+                var value = User.FindFirstValue(claimType);
+
+                if (Guid.TryParse(value, out var claimValue))
+                    return claimValue;
+            }
+
+            throw new UnauthorizedException("Invalid authentication token");
         }
     }
 }
