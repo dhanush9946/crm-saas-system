@@ -20,13 +20,15 @@ namespace CRM.Infrastructure.Services
             Guid userId,
             Guid tenantId,
             string email,
+            int tokenVersion,
             IEnumerable<string> roles)
         {
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),   
                 new Claim("tenantId", tenantId.ToString()),                   
-                new Claim(JwtRegisteredClaimNames.Email, email)
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim("ver", tokenVersion.ToString())
             };
 
             if (roles != null)

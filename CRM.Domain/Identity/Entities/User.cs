@@ -18,6 +18,8 @@ namespace CRM.Domain.Identity.Entities
 
         public bool IsEmailVerified { get; private set; } = false;
 
+        public int TokenVersion { get; private set; } = 1;
+
         public DateTime? LastLoginAtUtc { get; private set; }
 
         
@@ -88,6 +90,12 @@ namespace CRM.Domain.Identity.Entities
         public void Disable()
         {
             Status = UserStatus.Disabled;
+            IncrementTokenVersion();
+        }
+
+        public void IncrementTokenVersion()
+        {
+            TokenVersion++;
             SetUpdated();
         }
 
