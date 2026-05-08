@@ -104,9 +104,9 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             var refreshToken = await _refreshTokenService.CreateAsync(
                     user.TenantId,
                     user.Id,
-                    null,
-                    null,
-                    null,
+                    request.DeviceId,
+                    request.UserAgent,
+                    request.IpAddress,
                     cancellationToken
                 );
 
