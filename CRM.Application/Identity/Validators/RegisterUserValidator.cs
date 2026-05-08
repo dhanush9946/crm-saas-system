@@ -27,6 +27,11 @@ namespace CRM.Application.Identity.Validators
                 .NotEmpty()
                 .Matches("^[a-z0-9-]+$")
                 .WithMessage("Slug must be lowercase and hyphenated");
+
+           RuleFor(x => x.DisplayName)
+                .NotEmpty().WithMessage("Display Name is required")
+                .MinimumLength(2).WithMessage("Display Name must be at least 2 characters")
+                .MaximumLength(100).WithMessage("Display Name cannot exceed 100 characters");
         }
     }
 }

@@ -68,8 +68,8 @@ namespace CRM.Application.Identity.Commands.Login
                     user.TenantId,
                     user.Id,
                     request.DeviceId,
-                    null,
-                    null,
+                    request.UserAgent,
+                    request.IpAddress,
                     cancellationToken
                 );
 

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using FluentValidation;
 using CRM.API.Responses;
@@ -63,6 +63,12 @@ namespace CRM.API.Middleware
                 case BadRequestException:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     response.ErrorCode = "BAD_REQUEST";
+                    response.Message = ex.Message;
+                    break;
+
+                case ConflictException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+                    response.ErrorCode = "CONFLICT";
                     response.Message = ex.Message;
                     break;
 
