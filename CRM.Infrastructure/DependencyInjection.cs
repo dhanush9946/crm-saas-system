@@ -1,5 +1,6 @@
 ﻿using CRM.Application.Common.Interfaces;
 using CRM.Application.Identity.Interfaces;
+using CRM.Infrastructure.Identity;
 using CRM.Infrastructure.Persistence;
 using CRM.Infrastructure.Repositories.Identity;
 using CRM.Infrastructure.Services;
@@ -29,6 +30,11 @@ namespace CRM.Infrastructure
 
             //Unit of work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
+            services.AddHttpContextAccessor();
+
+            services.AddScoped<ICurrentUser, CurrentUser>();
 
 
             return services;

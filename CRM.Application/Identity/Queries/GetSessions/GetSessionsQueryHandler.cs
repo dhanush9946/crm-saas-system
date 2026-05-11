@@ -25,6 +25,7 @@ namespace CRM.Application.Identity.Queries.GetSessions
             return activeTokens
                 .Select(token => new SessionDto
                 {
+                    SessionId = token.TokenFamilyId,
                     Device = FormatDevice(token.UserAgent),
                     Ip = token.IpAddress,
                     LastActive = token.IssuedAtUtc,

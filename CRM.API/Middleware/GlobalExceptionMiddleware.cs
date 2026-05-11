@@ -60,6 +60,12 @@ namespace CRM.API.Middleware
                     response.Message = ex.Message;
                     break;
 
+                case ForbiddenException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    response.ErrorCode = "FORBIDDEN";
+                    response.Message = ex.Message;
+                    break;
+
                 case BadRequestException:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     response.ErrorCode = "BAD_REQUEST";

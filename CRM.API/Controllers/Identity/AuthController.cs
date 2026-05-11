@@ -1,5 +1,4 @@
 ﻿using CRM.API.Responses;
-using CRM.Application.Common.Exceptions;
 using CRM.Application.Identity.Commands.Login;
 using CRM.Application.Identity.Commands.Logout;
 using CRM.Application.Identity.Commands.LogoutAll;
@@ -8,10 +7,11 @@ using CRM.Application.Identity.Commands.RegisterUser;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Queries.GetSessions;
 using CRM.API.Requests.Auth;
+using CRM.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using CRM.Application.Identity.Commands.RevokeSession;
 
 namespace CRM.API.Controllers.Identity
 {
@@ -20,11 +20,15 @@ namespace CRM.API.Controllers.Identity
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediatr;
+        private readonly ICurrentUser _currentUser;
+
         public AuthController(
-               IMediator mediator
+               IMediator mediator,
+               ICurrentUser currentUser
                )
         {
             _mediatr = mediator;
+            _currentUser = currentUser;
         }
         [AllowAnonymous]
         [HttpPost("register")]
@@ -94,8 +98,8 @@ namespace CRM.API.Controllers.Identity
         {
             var query = new GetSessionsQuery
             {
-                UserId = GetRequiredGuidClaim(ClaimTypes.NameIdentifier, "sub"),
-                TenantId = GetRequiredGuidClaim("tenantId"),
+                UserId = _currentUser.UserId,
+                TenantId = _currentUser.TenantId,
                 DeviceId = Request.Headers["X-Device-Id"].FirstOrDefault()
             };
 
@@ -104,6 +108,19 @@ namespace CRM.API.Controllers.Identity
             var traceId = HttpContext.TraceIdentifier;
 
             return Ok(ApiResponse<List<SessionDto>>.SuccessResponse(result, traceId));
+        }
+
+        [Authorize]
+        [HttpDelete("sessions/{sessionId:guid}")]
+        public async Task<IActionResult> RevokeSession(
+            Guid sessionId,
+            CancellationToken cancellationToken)
+        {
+            await _mediatr.Send(
+                new RevokeSessionCommand(sessionId),
+                cancellationToken);
+
+            return NoContent();
         }
 
         [AllowAnonymous]
@@ -128,8 +145,8 @@ namespace CRM.API.Controllers.Identity
         {
             var command = new LogoutAllCommand
             {
-                UserId = GetRequiredGuidClaim(ClaimTypes.NameIdentifier, "sub"),
-                TenantId = GetRequiredGuidClaim("tenantId"),
+                UserId = _currentUser.UserId,
+                TenantId = _currentUser.TenantId,
                 DeviceId = request?.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
             };
@@ -139,17 +156,5 @@ namespace CRM.API.Controllers.Identity
             return NoContent();
         }
 
-        private Guid GetRequiredGuidClaim(params string[] claimTypes)
-        {
-            foreach (var claimType in claimTypes)
-            {
-                var value = User.FindFirstValue(claimType);
-
-                if (Guid.TryParse(value, out var claimValue))
-                    return claimValue;
-            }
-
-            throw new UnauthorizedException("Invalid authentication token");
-        }
     }
 }
