@@ -1,17 +1,22 @@
+using CRM.API.Responses;
 using CRM.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System.Net;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Text;
 
 namespace CRM.API.Extensions
 {
     public static class AuthenticationExtensions
     {
+        private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
         public static IServiceCollection AddJwtAuthentication(
             this IServiceCollection services,
             IConfiguration configuration)
@@ -41,6 +46,42 @@ namespace CRM.API.Extensions
 
                     options.Events = new JwtBearerEvents
                     {
+                        OnChallenge = async context =>
+                        {
+                            context.HandleResponse();
+
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            context.Response.ContentType = "application/json";
+                            context.Response.Headers.WWWAuthenticate = "Bearer";
+
+                            var hasAuthorizationHeader = context.Request.Headers.ContainsKey("Authorization");
+                            var response = new ErrorResponse
+                            {
+                                ErrorCode = "UNAUTHORIZED",
+                                Message = hasAuthorizationHeader
+                                    ? "Authentication token is invalid or expired"
+                                    : "Authentication is required",
+                                TraceId = context.HttpContext.TraceIdentifier
+                            };
+
+                            var json = JsonSerializer.Serialize(response, JsonOptions);
+                            await context.Response.WriteAsync(json);
+                        },
+                        OnForbidden = async context =>
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                            context.Response.ContentType = "application/json";
+
+                            var response = new ErrorResponse
+                            {
+                                ErrorCode = "FORBIDDEN",
+                                Message = "You do not have permission to access this resource",
+                                TraceId = context.HttpContext.TraceIdentifier
+                            };
+
+                            var json = JsonSerializer.Serialize(response, JsonOptions);
+                            await context.Response.WriteAsync(json);
+                        },
                         OnTokenValidated = async context =>
                         {
                             var userIdValue = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier)

@@ -80,10 +80,7 @@ namespace CRM.Application.Identity.Commands.RefreshTokenFolder
             // 5. Fetch roles
             var roles = await _userRoleRepository.GetUserRolesAsync(user.TenantId, user.Id, cancellationToken);
 
-            // 6. Generate new access token
-            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, user.TokenVersion, roles);
-
-            // 7. Rotate token
+            // 6. Rotate token
             var newRawToken = await _refreshTokenService.RotateAsync(
                 existingToken,
                 user.TenantId,
@@ -94,14 +91,24 @@ namespace CRM.Application.Identity.Commands.RefreshTokenFolder
                 cancellationToken
             );
 
+            // 7. Generate new access token for the same session family
+            var accessToken = _jwtService.GenerateToken(
+                user.Id,
+                user.TenantId,
+                newRawToken.SessionId,
+                user.Email,
+                user.TokenVersion,
+                roles);
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new AuthResponseDto
             {
                 TenantId = user.TenantId,
                 UserId = user.Id,
+                SessionId = newRawToken.SessionId,
                 AccessToken = accessToken,
-                RefreshToken = newRawToken
+                RefreshToken = newRawToken.RawToken
             };
         }
 
