@@ -50,13 +50,13 @@ namespace CRM.Application.Identity.Commands.LogoutAll
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
-                "LogoutAll audit event. UserId: {UserId}, TenantId: {TenantId}, RevokedSessionCount: {RevokedSessionCount}, TokenVersion: {TokenVersion}, IP: {IpAddress}, DeviceId: {DeviceId}",
+                "LogoutAll audit event. UserId: {UserId}, TenantId: {TenantId}, RequestSessionId: {SessionId}, RevokedSessionCount: {RevokedSessionCount}, TokenVersion: {TokenVersion}, IP: {IpAddress}",
                 request.UserId,
                 request.TenantId,
+                request.SessionId,
                 activeTokens.Count,
                 user.TokenVersion,
-                request.IpAddress,
-                request.DeviceId);
+                request.IpAddress);
         }
     }
 }

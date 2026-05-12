@@ -99,7 +99,6 @@ namespace CRM.Application.Identity.Commands.RegisterUser
 
             // 8. Generate tokens
             var roles = new List<string> { roleName };
-            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, user.TokenVersion, roles);
 
             var refreshToken = await _refreshTokenService.CreateAsync(
                     user.TenantId,
@@ -110,6 +109,14 @@ namespace CRM.Application.Identity.Commands.RegisterUser
                     cancellationToken
                 );
 
+            var accessToken = _jwtService.GenerateToken(
+                user.Id,
+                user.TenantId,
+                refreshToken.SessionId,
+                user.Email,
+                user.TokenVersion,
+                roles);
+
             // 9. SINGLE SAVE ALL
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -118,8 +125,9 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             {
                 TenantId = tenant.Id,
                 UserId = user.Id,
+                SessionId = refreshToken.SessionId,
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken.RawToken
             };
         }
     }

@@ -8,6 +8,8 @@ namespace CRM.API.Middleware
 {
     public class GlobalExceptionMiddleware
     {
+        private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
         private readonly RequestDelegate _next;
         private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
@@ -85,7 +87,7 @@ namespace CRM.API.Middleware
                     break;
             }
 
-            var json = JsonSerializer.Serialize(response);
+            var json = JsonSerializer.Serialize(response, JsonOptions);
 
             await context.Response.WriteAsync(json);
         }

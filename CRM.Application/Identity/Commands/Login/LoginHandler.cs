@@ -61,9 +61,6 @@ namespace CRM.Application.Identity.Commands.Login
             // 4. Fetch roles
             var roles = await _userRoleRepository.GetUserRolesAsync(user.TenantId, user.Id, cancellationToken);
 
-            // 5. Generate tokens 
-            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, user.TokenVersion, roles);
-            
             var refreshToken = await _refreshTokenService.CreateAsync(
                     user.TenantId,
                     user.Id,
@@ -73,6 +70,15 @@ namespace CRM.Application.Identity.Commands.Login
                     cancellationToken
                 );
 
+            // 5. Generate access token for the created session
+            var accessToken = _jwtService.GenerateToken(
+                user.Id,
+                user.TenantId,
+                refreshToken.SessionId,
+                user.Email,
+                user.TokenVersion,
+                roles);
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 5. Response
@@ -80,8 +86,9 @@ namespace CRM.Application.Identity.Commands.Login
             {
                 TenantId = user.TenantId,
                 UserId = user.Id,
+                SessionId = refreshToken.SessionId,
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken.RawToken
             };
         }
     }

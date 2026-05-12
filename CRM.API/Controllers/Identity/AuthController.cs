@@ -100,6 +100,7 @@ namespace CRM.API.Controllers.Identity
             {
                 UserId = _currentUser.UserId,
                 TenantId = _currentUser.TenantId,
+                SessionId = _currentUser.SessionId,
                 DeviceId = Request.Headers["X-Device-Id"].FirstOrDefault()
             };
 
@@ -141,13 +142,13 @@ namespace CRM.API.Controllers.Identity
 
         [Authorize]
         [HttpPost("logout-all")]
-        public async Task<IActionResult> LogoutAll(LogoutAllRequestDto? request, CancellationToken cancellationToken)
+        public async Task<IActionResult> LogoutAll(CancellationToken cancellationToken)
         {
             var command = new LogoutAllCommand
             {
                 UserId = _currentUser.UserId,
                 TenantId = _currentUser.TenantId,
-                DeviceId = request?.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                SessionId = _currentUser.SessionId,
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
             };
 

@@ -47,4 +47,19 @@ public sealed class CurrentUser : ICurrentUser
                 : throw new UnauthorizedException("Invalid authentication token");
         }
     }
+
+    public Guid? SessionId
+    {
+        get
+        {
+            var sessionId = _httpContextAccessor
+                .HttpContext?
+                .User?
+                .FindFirstValue("sessionId");
+
+            return Guid.TryParse(sessionId, out var parsedSessionId)
+                ? parsedSessionId
+                : null;
+        }
+    }
 }

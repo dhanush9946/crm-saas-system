@@ -29,8 +29,10 @@ namespace CRM.Application.Identity.Queries.GetSessions
                     Device = FormatDevice(token.UserAgent),
                     Ip = token.IpAddress,
                     LastActive = token.IssuedAtUtc,
-                    IsCurrent = !string.IsNullOrWhiteSpace(request.DeviceId) &&
-                                token.DeviceId == request.DeviceId
+                    IsCurrent = request.SessionId.HasValue
+                        ? token.TokenFamilyId == request.SessionId.Value
+                        : !string.IsNullOrWhiteSpace(request.DeviceId) &&
+                          token.DeviceId == request.DeviceId
                 })
                 .ToList();
         }
