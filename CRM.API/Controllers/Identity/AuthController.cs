@@ -1,17 +1,19 @@
-﻿using CRM.API.Responses;
+﻿using CRM.API.Requests.Auth;
+using CRM.API.Responses;
+using CRM.Application.Common.Interfaces;
 using CRM.Application.Identity.Commands.Login;
 using CRM.Application.Identity.Commands.Logout;
 using CRM.Application.Identity.Commands.LogoutAll;
 using CRM.Application.Identity.Commands.RefreshTokenFolder;
 using CRM.Application.Identity.Commands.RegisterUser;
+using CRM.Application.Identity.Commands.RevokeSession;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Queries.GetSessions;
-using CRM.API.Requests.Auth;
-using CRM.Application.Common.Interfaces;
+using CRM.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CRM.Application.Identity.Commands.RevokeSession;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CRM.API.Controllers.Identity
 {
@@ -30,6 +32,8 @@ namespace CRM.API.Controllers.Identity
             _mediatr = mediator;
             _currentUser = currentUser;
         }
+
+        [EnableRateLimiting(RateLimitPolicies.RegisterPolicy)]
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterUserRequestDto request, CancellationToken cancellationToken)
@@ -52,6 +56,8 @@ namespace CRM.API.Controllers.Identity
 
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
         }
+
+        [EnableRateLimiting(RateLimitPolicies.LoginPolicy)]
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDto request, CancellationToken cancellationToken)
@@ -73,6 +79,7 @@ namespace CRM.API.Controllers.Identity
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
         }
 
+        [EnableRateLimiting(RateLimitPolicies.RefreshPolicy)]
         [AllowAnonymous]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenRequestDto request, CancellationToken cancellationToken)
