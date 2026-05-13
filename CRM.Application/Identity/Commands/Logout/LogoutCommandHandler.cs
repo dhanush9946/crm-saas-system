@@ -1,5 +1,6 @@
 using CRM.Application.Common.Interfaces;
 using CRM.Application.Identity.Interfaces;
+using CRM.Domain.Identity.Constants;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -11,17 +12,20 @@ namespace CRM.Application.Identity.Commands.Logout
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<LogoutCommandHandler> _logger;
+        private readonly IAuditService _auditService;
 
         public LogoutCommandHandler(
             IRefreshTokenRepository refreshTokenRepository,
             IRefreshTokenService refreshTokenService,
             IUnitOfWork unitOfWork,
-            ILogger<LogoutCommandHandler> logger)
+            ILogger<LogoutCommandHandler> logger,
+            IAuditService auditService)
         {
             _refreshTokenRepository = refreshTokenRepository;
             _refreshTokenService = refreshTokenService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _auditService = auditService;
         }
 
         public async Task Handle(LogoutCommand request, CancellationToken cancellationToken)
@@ -78,6 +82,19 @@ namespace CRM.Application.Identity.Commands.Logout
                 existingToken.TenantId,
                 request.IpAddress,
                 request.DeviceId);
+
+            await _auditService.LogAsync(
+                AuditActionConstants.LogoutSucceeded,
+                existingToken.UserId,
+                existingToken.TenantId,
+                "RefreshToken",
+                existingToken.Id.ToString(),
+                ipAddress: request.IpAddress,
+                userAgent: request.UserAgent,
+                deviceId: request.DeviceId,
+                traceId: request.TraceId,
+                metadataJson: $$"""{"sessionId":"{{existingToken.TokenFamilyId}}","revokedTokenCount":{{tokenFamily.Count(token => token.IsRevoked())}}}""",
+                cancellationToken: cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }

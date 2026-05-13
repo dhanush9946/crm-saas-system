@@ -31,10 +31,13 @@ namespace CRM.Infrastructure
             //Unit of work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-
+            //claims fetch
             services.AddHttpContextAccessor();
 
             services.AddScoped<ICurrentUser, CurrentUser>();
+
+            //AuditLog
+            services.AddScoped<IAuditService, AuditService>();
 
 
             return services;

@@ -1,6 +1,7 @@
 using CRM.Application.Common.Exceptions;
 using CRM.Application.Common.Interfaces;
 using CRM.Application.Identity.Interfaces;
+using CRM.Domain.Identity.Constants;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -12,17 +13,20 @@ namespace CRM.Application.Identity.Commands.LogoutAll
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<LogoutAllCommandHandler> _logger;
+        private readonly IAuditService _auditService;
 
         public LogoutAllCommandHandler(
             IRefreshTokenRepository refreshTokenRepository,
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
-            ILogger<LogoutAllCommandHandler> logger)
+            ILogger<LogoutAllCommandHandler> logger,
+            IAuditService auditService)
         {
             _refreshTokenRepository = refreshTokenRepository;
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _auditService = auditService;
         }
 
         public async Task Handle(LogoutAllCommand request, CancellationToken cancellationToken)
@@ -46,6 +50,18 @@ namespace CRM.Application.Identity.Commands.LogoutAll
             }
 
             user.IncrementTokenVersion();
+
+            await _auditService.LogAsync(
+                AuditActionConstants.LogoutAllSucceeded,
+                request.UserId,
+                request.TenantId,
+                "User",
+                request.UserId.ToString(),
+                ipAddress: request.IpAddress,
+                userAgent: request.UserAgent,
+                traceId: request.TraceId,
+                metadataJson: $$"""{"requestSessionId":"{{request.SessionId}}","revokedSessionCount":{{activeTokens.Count}},"tokenVersion":{{user.TokenVersion}}}""",
+                cancellationToken: cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -3,6 +3,7 @@ using CRM.Application.Common.Exceptions;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Interfaces;
 using CRM.Application.Common.Interfaces;
+using CRM.Domain.Identity.Constants;
 using MediatR;
 
 namespace CRM.Application.Identity.Commands.Login
@@ -16,6 +17,7 @@ namespace CRM.Application.Identity.Commands.Login
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IJwtService _jwtService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAuditService _auditService;
 
         public LoginHandler(
             IUserRepository userRepository,
@@ -24,7 +26,8 @@ namespace CRM.Application.Identity.Commands.Login
             ITenantRepository tenantRepository,
             IUserRoleRepository userRoleRepository,
             IJwtService jwtService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IAuditService auditService)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
@@ -33,6 +36,7 @@ namespace CRM.Application.Identity.Commands.Login
             _userRoleRepository = userRoleRepository;
             _jwtService = jwtService;
             _unitOfWork = unitOfWork;
+            _auditService = auditService;
         }
 
         public async Task<AuthResponseDto> Handle(LoginCommand request,CancellationToken cancellationToken)
@@ -41,7 +45,22 @@ namespace CRM.Application.Identity.Commands.Login
             var tenant = await _tenantRepository.GetBySlugAsync(request.TenantSlug,cancellationToken);
 
             if (tenant == null)
+            {
+                await _auditService.LogAsync(
+                    AuditActionConstants.LoginFailed,
+                    tenantId: null,
+                    succeeded: false,
+                    failureReason: "Invalid tenant",
+                    ipAddress: request.IpAddress,
+                    userAgent: request.UserAgent,
+                    deviceId: request.DeviceId,
+                    traceId: request.TraceId,
+                    cancellationToken: cancellationToken);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
                 throw new UnauthorizedException("Invalid tenant");
+            }
 
             // 2. Get user
             var user = await _userRepository.GetByEmailAsync(tenant.Id, request.Email,cancellationToken);
@@ -49,12 +68,42 @@ namespace CRM.Application.Identity.Commands.Login
             if (user == null || user.PasswordHash == null ||
                 !_passwordHasher.Verify(request.Password, user.PasswordHash))
             {
+                await _auditService.LogAsync(
+                    AuditActionConstants.LoginFailed,
+                    user?.Id,
+                    tenant.Id,
+                    succeeded: false,
+                    failureReason: "Invalid credentials",
+                    ipAddress: request.IpAddress,
+                    userAgent: request.UserAgent,
+                    deviceId: request.DeviceId,
+                    traceId: request.TraceId,
+                    cancellationToken: cancellationToken);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
                 throw new UnauthorizedException("Invalid credentials");
             }
 
             // 3. Check disabled
             if (user.IsDisabled())
+            {
+                await _auditService.LogAsync(
+                    AuditActionConstants.LoginFailed,
+                    user.Id,
+                    tenant.Id,
+                    succeeded: false,
+                    failureReason: "User is disabled",
+                    ipAddress: request.IpAddress,
+                    userAgent: request.UserAgent,
+                    deviceId: request.DeviceId,
+                    traceId: request.TraceId,
+                    cancellationToken: cancellationToken);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
                 throw new UnauthorizedException("User is disabled");
+            }
 
             user.RecordLogin();
 
@@ -78,6 +127,19 @@ namespace CRM.Application.Identity.Commands.Login
                 user.Email,
                 user.TokenVersion,
                 roles);
+
+            await _auditService.LogAsync(
+                AuditActionConstants.LoginSucceeded,
+                user.Id,
+                user.TenantId,
+                "User",
+                user.Id.ToString(),
+                ipAddress: request.IpAddress,
+                userAgent: request.UserAgent,
+                deviceId: request.DeviceId,
+                traceId: request.TraceId,
+                metadataJson: $$"""{"sessionId":"{{refreshToken.SessionId}}"}""",
+                cancellationToken: cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -47,7 +47,8 @@ namespace CRM.API.Controllers.Identity
                 DisplayName = request.DisplayName,
                 DeviceId = request.DeviceId,
                 UserAgent = Request.Headers.UserAgent.ToString(),
-                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                TraceId = HttpContext.TraceIdentifier
             };
 
             var result = await _mediatr.Send(command, cancellationToken);
@@ -69,7 +70,8 @@ namespace CRM.API.Controllers.Identity
                 Password = request.Password,
                 DeviceId = request.DeviceId,
                 UserAgent = Request.Headers.UserAgent.ToString(),
-                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                TraceId = HttpContext.TraceIdentifier
             };
 
             var result = await _mediatr.Send(command, cancellationToken);
@@ -89,7 +91,8 @@ namespace CRM.API.Controllers.Identity
                 RefreshToken = request.RefreshToken,
                 DeviceId = request.DeviceId,
                 UserAgent = Request.Headers.UserAgent.ToString(),
-                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                TraceId = HttpContext.TraceIdentifier
             };
 
             var result = await _mediatr.Send(command, cancellationToken);
@@ -125,7 +128,11 @@ namespace CRM.API.Controllers.Identity
             CancellationToken cancellationToken)
         {
             await _mediatr.Send(
-                new RevokeSessionCommand(sessionId),
+                new RevokeSessionCommand(
+                    sessionId,
+                    HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    Request.Headers.UserAgent.ToString(),
+                    HttpContext.TraceIdentifier),
                 cancellationToken);
 
             return NoContent();
@@ -139,7 +146,9 @@ namespace CRM.API.Controllers.Identity
             {
                 RefreshToken = request.RefreshToken,
                 DeviceId = request.DeviceId,
-                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = Request.Headers.UserAgent.ToString(),
+                TraceId = HttpContext.TraceIdentifier
             };
 
             await _mediatr.Send(command, cancellationToken);
@@ -156,7 +165,9 @@ namespace CRM.API.Controllers.Identity
                 UserId = _currentUser.UserId,
                 TenantId = _currentUser.TenantId,
                 SessionId = _currentUser.SessionId,
-                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = Request.Headers.UserAgent.ToString(),
+                TraceId = HttpContext.TraceIdentifier
             };
 
             await _mediatr.Send(command, cancellationToken);
