@@ -13,5 +13,6 @@ namespace CRM.Application.Identity.Commands.Login
         public string? DeviceId { get; set; }
         public string? UserAgent { get; set; }
         public string? IpAddress { get; set; }
+        public string? TraceId { get; set; }
     }
 }

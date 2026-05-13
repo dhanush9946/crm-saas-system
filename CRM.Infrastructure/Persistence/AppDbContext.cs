@@ -20,6 +20,7 @@ namespace CRM.Infrastructure.Persistence
 
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<UserRole> UserRoles => Set<UserRole>();
+        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

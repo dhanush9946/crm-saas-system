@@ -8,5 +8,7 @@ namespace CRM.Application.Identity.Commands.LogoutAll
         public Guid UserId { get; init; }
         public Guid? SessionId { get; init; }
         public string? IpAddress { get; init; }
+        public string? UserAgent { get; init; }
+        public string? TraceId { get; init; }
     }
 }

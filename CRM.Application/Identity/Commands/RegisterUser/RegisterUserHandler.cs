@@ -18,6 +18,7 @@ namespace CRM.Application.Identity.Commands.RegisterUser
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJwtService _jwtService;
+        private readonly IAuditService _auditService;
 
         public RegisterUserHandler(
             IUserRepository userRepository,
@@ -27,7 +28,8 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             IRoleRepository roleRepository,
             IUserRoleRepository userRoleRepository,
             IUnitOfWork unitOfWork,
-            IJwtService jwtService)
+            IJwtService jwtService,
+            IAuditService auditService)
         {
             _userRepository = userRepository;
             _tenantRepository = tenantRepository;
@@ -37,6 +39,7 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             _userRoleRepository = userRoleRepository;
             _unitOfWork = unitOfWork;
             _jwtService = jwtService;
+            _auditService = auditService;
         }
 
         public async Task<AuthResponseDto> Handle(
@@ -116,6 +119,19 @@ namespace CRM.Application.Identity.Commands.RegisterUser
                 user.Email,
                 user.TokenVersion,
                 roles);
+
+            await _auditService.LogAsync(
+                AuditActionConstants.TenantRegistered,
+                user.Id,
+                tenant.Id,
+                nameof(Tenant),
+                tenant.Id.ToString(),
+                ipAddress: request.IpAddress,
+                userAgent: request.UserAgent,
+                deviceId: request.DeviceId,
+                traceId: request.TraceId,
+                metadataJson: $$"""{"sessionId":"{{refreshToken.SessionId}}","ownerRoleId":"{{ownerRole.Id}}"}""",
+                cancellationToken: cancellationToken);
 
             // 9. SINGLE SAVE ALL
             await _unitOfWork.SaveChangesAsync(cancellationToken);
