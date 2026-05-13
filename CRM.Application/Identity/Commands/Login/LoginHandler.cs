@@ -65,9 +65,33 @@ namespace CRM.Application.Identity.Commands.Login
             // 2. Get user
             var user = await _userRepository.GetByEmailAsync(tenant.Id, request.Email,cancellationToken);
 
+            if (user != null && user.IsLockedOut())
+            {
+                await _auditService.LogAsync(
+                    AuditActionConstants.LoginFailed,
+                    user.Id,
+                    tenant.Id,
+                    succeeded: false,
+                    failureReason: "Account locked out",
+                    ipAddress: request.IpAddress,
+                    userAgent: request.UserAgent,
+                    deviceId: request.DeviceId,
+                    traceId: request.TraceId,
+                    cancellationToken: cancellationToken);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                throw new UnauthorizedException("Account is temporarily locked due to multiple failed login attempts.");
+            }
+
             if (user == null || user.PasswordHash == null ||
                 !_passwordHasher.Verify(request.Password, user.PasswordHash))
             {
+                if (user != null)
+                {
+                    user.RecordFailedLogin();
+                }
+
                 await _auditService.LogAsync(
                     AuditActionConstants.LoginFailed,
                     user?.Id,
