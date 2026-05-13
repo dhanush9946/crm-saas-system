@@ -1,4 +1,4 @@
-﻿
+
 
 using CRM.Domain.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +18,10 @@ namespace CRM.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(320);
 
+            builder.Property(x => x.EmailNormalized)
+                .IsRequired()
+                .HasMaxLength(320);
+
             builder.Property(x => x.PasswordHash)
                 .HasMaxLength(500);
 
@@ -26,7 +30,7 @@ namespace CRM.Infrastructure.Persistence.Configurations
                 .HasDefaultValue(1);
 
             // Multi-tenant unique email
-            builder.HasIndex(x => new { x.TenantId, x.Email })
+            builder.HasIndex(x => new { x.TenantId, x.EmailNormalized })
                 .IsUnique();
 
             // Relationship

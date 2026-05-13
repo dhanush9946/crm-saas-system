@@ -1,4 +1,4 @@
-﻿using CRM.Domain.Common;
+using CRM.Domain.Common;
 using CRM.Domain.Identity.Enums;
 
 namespace CRM.Domain.Identity.Entities
@@ -22,7 +22,9 @@ namespace CRM.Domain.Identity.Entities
 
         public DateTime? LastLoginAtUtc { get; private set; }
 
-        
+        public int FailedLoginAttempts { get; private set; }
+        public DateTime? LockoutEndUtc { get; private set; }
+
         public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
 
 
@@ -78,7 +80,33 @@ namespace CRM.Domain.Identity.Entities
         public void RecordLogin()
         {
             LastLoginAtUtc = DateTime.UtcNow;
+            ResetFailedLogins();
             SetUpdated();
+        }
+
+        public void RecordFailedLogin()
+        {
+            FailedLoginAttempts++;
+            if (FailedLoginAttempts >= 5)
+            {
+                LockoutEndUtc = DateTime.UtcNow.AddMinutes(15);
+            }
+            SetUpdated();
+        }
+
+        public void ResetFailedLogins()
+        {
+            if (FailedLoginAttempts > 0 || LockoutEndUtc.HasValue)
+            {
+                FailedLoginAttempts = 0;
+                LockoutEndUtc = null;
+                SetUpdated();
+            }
+        }
+
+        public bool IsLockedOut()
+        {
+            return LockoutEndUtc.HasValue && LockoutEndUtc.Value > DateTime.UtcNow;
         }
 
         public void Activate()

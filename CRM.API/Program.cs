@@ -50,8 +50,15 @@ try
         app.UseSwagger();
         app.UseSwaggerUI();
     }
+    else
+    {
+        app.UseHsts();
+    }
 
     app.UseHttpsRedirection();
+
+    app.UseSecurityHeaders();
+    app.UseCorrelationId();
 
     app.UseSerilogRequestLogging();
 
