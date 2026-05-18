@@ -1,4 +1,4 @@
-﻿using CRM.API.Requests.Auth;
+using CRM.API.Requests.Auth;
 using CRM.API.Responses;
 using CRM.Application.Common.Interfaces;
 using CRM.Application.Identity.Commands.Login;
@@ -6,7 +6,9 @@ using CRM.Application.Identity.Commands.Logout;
 using CRM.Application.Identity.Commands.LogoutAll;
 using CRM.Application.Identity.Commands.RefreshTokenFolder;
 using CRM.Application.Identity.Commands.RegisterUser;
+using CRM.Application.Identity.Commands.ResendVerificationEmail;
 using CRM.Application.Identity.Commands.RevokeSession;
+using CRM.Application.Identity.Commands.VerifyEmail;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Queries.GetSessions;
 using CRM.Shared.Constants;
@@ -171,6 +173,49 @@ namespace CRM.API.Controllers.Identity
             };
 
             await _mediatr.Send(command, cancellationToken);
+
+            return NoContent();
+        }
+
+        [EnableRateLimiting(RateLimitPolicies.LoginPolicy)]
+        [AllowAnonymous]
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail(
+                 VerifyEmailRequestDto request,
+                 CancellationToken cancellationToken)
+        {
+            var command = new VerifyEmailCommand(
+                request.Token,
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                Request.Headers.UserAgent.ToString(),
+                request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                HttpContext.TraceIdentifier);
+
+            await _mediatr.Send(
+                command,
+                cancellationToken);
+
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [EnableRateLimiting(
+        RateLimitPolicies.RegisterPolicy)]
+        [HttpPost("resend-verification-email")]
+        public async Task<IActionResult> ResendVerificationEmail(
+            ResendVerificationEmailRequestDto request,
+            CancellationToken cancellationToken)
+        {
+            var command = new ResendVerificationEmailCommand(
+                request.Email,
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                Request.Headers.UserAgent.ToString(),
+                request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                HttpContext.TraceIdentifier);
+
+            await _mediatr.Send(
+                command,
+                cancellationToken);
 
             return NoContent();
         }

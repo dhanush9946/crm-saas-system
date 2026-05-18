@@ -4,6 +4,7 @@ using CRM.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRM.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260516105823_AddEmailVerificationTokens")]
+    partial class AddEmailVerificationTokens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,8 +119,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.Property<byte[]>("TokenHash")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varbinary(32)");
+                        .HasColumnType("varbinary(900)");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
@@ -312,9 +314,6 @@ namespace CRM.Infrastructure.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("nvarchar(320)");
 
-                    b.Property<DateTime?>("EmailVerifiedAtUtc")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("FailedLoginAttempts")
                         .HasColumnType("int");
 
@@ -330,12 +329,6 @@ namespace CRM.Infrastructure.Migrations
                     b.Property<string>("PasswordHash")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("PendingEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PendingEmailNormalized")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()

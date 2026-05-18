@@ -10,4 +10,7 @@ public static class AuditActionConstants
     public const string SessionRevoked = "SessionRevoked";
     public const string RefreshTokenRotated = "RefreshTokenRotated";
     public const string RefreshTokenReuseDetected = "RefreshTokenReuseDetected";
+    public const string EmailVerified = "EmailVerified";
+    public const string EmailVerificationFailed = "EmailVerificationFailed";
+    public const string VerificationEmailResent = "VerificationEmailResent";
 }
