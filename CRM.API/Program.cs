@@ -25,7 +25,7 @@ try
 
     // Application & Infrastructure
     builder.Services.AddApplicationServices();
-    builder.Services.AddInfrastructure();
+    builder.Services.AddInfrastructure(builder.Configuration);
 
     // Authentication & Authorization
     builder.Services.AddJwtAuthentication(builder.Configuration);

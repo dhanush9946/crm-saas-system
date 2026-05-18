@@ -10,5 +10,6 @@ namespace CRM.Application.Identity.Interfaces
     public interface IUserRepository : IRepository<User>
     {
         Task<User?> GetByEmailAsync(Guid tenantId, string email,CancellationToken cancellationToken);
+        Task<User?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken);
     }
 }
