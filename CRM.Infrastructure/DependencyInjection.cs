@@ -33,6 +33,7 @@ namespace CRM.Infrastructure
 
             //Email Verification
             services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+            services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 
             //Email service
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));

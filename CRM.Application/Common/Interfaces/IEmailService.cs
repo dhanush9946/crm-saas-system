@@ -12,4 +12,14 @@ public interface IEmailService
         string to,
         string rawToken,
         CancellationToken cancellationToken = default);
+
+    Task SendPasswordResetEmailAsync(
+        string to,
+        string tenantSlug,
+        string rawToken,
+        CancellationToken cancellationToken = default);
+
+    Task SendPasswordResetConfirmationEmailAsync(
+        string to,
+        CancellationToken cancellationToken = default);
 }

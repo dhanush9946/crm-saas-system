@@ -13,4 +13,7 @@ public static class AuditActionConstants
     public const string EmailVerified = "EmailVerified";
     public const string EmailVerificationFailed = "EmailVerificationFailed";
     public const string VerificationEmailResent = "VerificationEmailResent";
+    public const string PasswordResetRequested = "PasswordResetRequested";
+    public const string PasswordResetSucceeded = "PasswordResetSucceeded";
+    public const string PasswordResetFailed = "PasswordResetFailed";
 }

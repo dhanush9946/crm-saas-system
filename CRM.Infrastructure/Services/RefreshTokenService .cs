@@ -132,5 +132,23 @@ namespace CRM.Infrastructure.Services
                 token.Revoke();
             }
         }
+
+        public async Task<int> RevokeAllByUserAsync(
+            Guid tenantId,
+            Guid userId,
+            CancellationToken cancellationToken)
+        {
+            var activeTokens = await _repository.GetActiveByUserAsync(
+                tenantId,
+                userId,
+                cancellationToken);
+
+            foreach (var token in activeTokens)
+            {
+                token.Revoke();
+            }
+
+            return activeTokens.Count;
+        }
     }
 }
