@@ -1,0 +1,62 @@
+services:
+  crm.api:
+    build:
+      context: .
+      dockerfile: CRM.API/Dockerfile
+    image: crm-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Server=crm.sql,1433;Database=${SQL_DATABASE:-CRM_DB};User Id=sa;Password=${SQL_SA_PASSWORD:?SQL_SA_PASSWORD is required};TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=True
+      Jwt__Issuer: crm-api
+      Jwt__Audience: crm-client
+      Jwt__Key: ${JWT_KEY:?JWT_KEY is required}
+      Jwt__RefreshTokenExpirationDays: 7
+      EmailSettings__Host: ${EMAIL_HOST:-}
+      EmailSettings__Port: ${EMAIL_PORT:-587}
+      EmailSettings__Username: ${EMAIL_USERNAME:-}
+      EmailSettings__Password: ${EMAIL_PASSWORD:-}
+      EmailSettings__FromEmail: ${EMAIL_FROM_EMAIL:-}
+      EmailSettings__FromName: ${EMAIL_FROM_NAME:-CRM System}
+      EmailSettings__VerificationUrl: ${EMAIL_VERIFICATION_URL:-}
+    ports:
+      - "5000:8080"
+    depends_on:
+      crm.sql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - crm-network
+
+  crm.sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: ${MSSQL_PID:-Developer}
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:?SQL_SA_PASSWORD is required}
+    ports:
+      - "1434:1433"
+    volumes:
+      - crm-sql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${SQL_SA_PASSWORD}\" -Q \"SELECT 1\" -C || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"${SQL_SA_PASSWORD}\" -Q \"SELECT 1\""]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - crm-network
+
+networks:
+  crm-network:
+    driver: bridge
+
+volumes:
+  crm-sql-data:
