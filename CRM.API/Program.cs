@@ -16,10 +16,13 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+
     // Database
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(
-            builder.Configuration.GetConnectionString("DefaultConnection"),
+            defaultConnectionString,
             sql => sql.EnableRetryOnFailure()
         ));
 
@@ -38,6 +41,7 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerWithAuth();
+    builder.Services.AddHealthChecks();
 
     //Serilog
     builder.AddSerilogLogging();
@@ -69,6 +73,9 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+    app.MapHealthChecks("/health");
+
+    await ApplyMigrationsAsync(app);
 
     app.Run();
 }
@@ -79,4 +86,29 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+static async Task ApplyMigrationsAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("StartupMigration");
+
+    const int maxAttempts = 10;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            await context.Database.MigrateAsync();
+            logger.LogInformation("Database migrations applied successfully.");
+            return;
+        }
+        catch (Exception ex) when (attempt < maxAttempts)
+        {
+            logger.LogWarning(ex, "Database migration attempt {Attempt}/{MaxAttempts} failed. Retrying in 5 seconds...", attempt, maxAttempts);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
+    }
+
+    await context.Database.MigrateAsync();
 }
