@@ -12,5 +12,9 @@ namespace CRM.Application.Identity.Commands.RegisterUser
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
         public string DisplayName { get; set; } = null!;
+        public string? DeviceId { get; set; }
+        public string? UserAgent { get; set; }
+        public string? IpAddress { get; set; }
+        public string? TraceId { get; set; }
     }
 }

@@ -47,7 +47,7 @@ namespace CRM.Infrastructure.Services
         }
 
         // CREATE
-        public async Task<string> CreateAsync(
+        public async Task<RefreshTokenResult> CreateAsync(
             Guid tenantId,
             Guid userId,
             string? deviceId,
@@ -73,11 +73,15 @@ namespace CRM.Infrastructure.Services
             // 3. Save
             await _repository.AddAsync(refreshToken,cancellationToken);
 
-            return rawToken;
+            return new RefreshTokenResult
+            {
+                SessionId = refreshToken.TokenFamilyId,
+                RawToken = rawToken
+            };
         }
 
         //  ROTATE (Used in REFRESH)
-        public async Task<string> RotateAsync(
+        public async Task<RefreshTokenResult> RotateAsync(
             RefreshToken existingToken,
             Guid tenantId,
             Guid userId,
@@ -110,7 +114,11 @@ namespace CRM.Infrastructure.Services
             // 3. Save new token
             await _repository.AddAsync(newToken,cancellationToken);
 
-            return newRawToken;
+            return new RefreshTokenResult
+            {
+                SessionId = newToken.TokenFamilyId,
+                RawToken = newRawToken
+            };
         }
 
         public async Task RevokeFamilyAsync(
@@ -123,6 +131,24 @@ namespace CRM.Infrastructure.Services
             {
                 token.Revoke();
             }
+        }
+
+        public async Task<int> RevokeAllByUserAsync(
+            Guid tenantId,
+            Guid userId,
+            CancellationToken cancellationToken)
+        {
+            var activeTokens = await _repository.GetActiveByUserAsync(
+                tenantId,
+                userId,
+                cancellationToken);
+
+            foreach (var token in activeTokens)
+            {
+                token.Revoke();
+            }
+
+            return activeTokens.Count;
         }
     }
 }

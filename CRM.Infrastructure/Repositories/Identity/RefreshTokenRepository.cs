@@ -35,6 +35,7 @@ namespace CRM.Infrastructure.Repositories.Identity
                     x.UserId == userId &&
                     x.RevokedAtUtc == null &&
                     x.ExpiresAtUtc > DateTime.UtcNow)
+                .OrderByDescending(x => x.IssuedAtUtc)
                 .ToListAsync(cancellationToken);
         }
     }

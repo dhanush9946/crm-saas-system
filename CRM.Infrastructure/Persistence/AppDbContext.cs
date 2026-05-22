@@ -1,4 +1,5 @@
 using CRM.Domain.Common;
+using CRM.Domain.Entities;
 using CRM.Domain.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -20,6 +21,10 @@ namespace CRM.Infrastructure.Persistence
 
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<UserRole> UserRoles => Set<UserRole>();
+        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
+        public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

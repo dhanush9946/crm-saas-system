@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using FluentValidation;
 using CRM.API.Responses;
@@ -8,6 +8,8 @@ namespace CRM.API.Middleware
 {
     public class GlobalExceptionMiddleware
     {
+        private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
         private readonly RequestDelegate _next;
         private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
@@ -60,9 +62,21 @@ namespace CRM.API.Middleware
                     response.Message = ex.Message;
                     break;
 
+                case ForbiddenException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    response.ErrorCode = "FORBIDDEN";
+                    response.Message = ex.Message;
+                    break;
+
                 case BadRequestException:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     response.ErrorCode = "BAD_REQUEST";
+                    response.Message = ex.Message;
+                    break;
+
+                case ConflictException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+                    response.ErrorCode = "CONFLICT";
                     response.Message = ex.Message;
                     break;
 
@@ -73,7 +87,7 @@ namespace CRM.API.Middleware
                     break;
             }
 
-            var json = JsonSerializer.Serialize(response);
+            var json = JsonSerializer.Serialize(response, JsonOptions);
 
             await context.Response.WriteAsync(json);
         }

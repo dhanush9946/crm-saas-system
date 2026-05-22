@@ -1,10 +1,12 @@
 using CRM.Application.Common.Exceptions;
 using CRM.Application.Common.Interfaces;
+using CRM.Application.Common.Interfaces.Persistence;
 using CRM.Application.Identity.DTOs.Auth;
 using CRM.Application.Identity.Interfaces;
-using CRM.Domain.Identity.Entities;
 using CRM.Domain.Identity.Constants;
+using CRM.Domain.Identity.Entities;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace CRM.Application.Identity.Commands.RegisterUser
 {
@@ -18,6 +20,12 @@ namespace CRM.Application.Identity.Commands.RegisterUser
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJwtService _jwtService;
+        private readonly IAuditService _auditService;
+        private readonly ITokenGenerator _tokenGenerator;
+        private readonly IEmailVerificationTokenRepository
+                                  _emailVerificationTokenRepository;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<RegisterUserHandler> _logger;
 
         public RegisterUserHandler(
             IUserRepository userRepository,
@@ -27,7 +35,12 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             IRoleRepository roleRepository,
             IUserRoleRepository userRoleRepository,
             IUnitOfWork unitOfWork,
-            IJwtService jwtService)
+            IJwtService jwtService,
+            IAuditService auditService,
+            ITokenGenerator tokenGenerator,
+            IEmailVerificationTokenRepository emailVerificationTokenRepository,
+            IEmailService emailService,
+            ILogger<RegisterUserHandler> logger)
         {
             _userRepository = userRepository;
             _tenantRepository = tenantRepository;
@@ -37,6 +50,12 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             _userRoleRepository = userRoleRepository;
             _unitOfWork = unitOfWork;
             _jwtService = jwtService;
+            _auditService = auditService;
+            _tokenGenerator = tokenGenerator;
+            _emailVerificationTokenRepository =
+                emailVerificationTokenRepository;
+            _emailService = emailService;
+            _logger = logger;
         }
 
         public async Task<AuthResponseDto> Handle(
@@ -63,6 +82,27 @@ namespace CRM.Application.Identity.Commands.RegisterUser
             );
 
             user.SetPasswordHash(passwordHash);
+
+            //email verification token generation
+            var rawVerificationToken =
+                _tokenGenerator.GenerateSecureToken();
+
+            var hashedVerificationToken =
+                _tokenGenerator.ComputeSha256Hash(
+                    rawVerificationToken);
+
+            var verificationToken =
+                EmailVerificationToken.Create(
+                    user.TenantId,
+                    user.Id,
+                    hashedVerificationToken,
+                    DateTime.UtcNow.AddHours(24));
+
+            await _emailVerificationTokenRepository
+                            .AddAsync(
+                                verificationToken,
+                                cancellationToken);
+
 
             // 4. Ensure OWNER role exists
             const string roleName = RoleConstants.Owner;
@@ -99,27 +139,65 @@ namespace CRM.Application.Identity.Commands.RegisterUser
 
             // 8. Generate tokens
             var roles = new List<string> { roleName };
-            var accessToken = _jwtService.GenerateToken(user.Id, user.TenantId, user.Email, roles);
 
             var refreshToken = await _refreshTokenService.CreateAsync(
                     user.TenantId,
                     user.Id,
-                    null,
-                    null,
-                    null,
+                    request.DeviceId,
+                    request.UserAgent,
+                    request.IpAddress,
                     cancellationToken
                 );
+
+            var accessToken = _jwtService.GenerateToken(
+                user.Id,
+                user.TenantId,
+                refreshToken.SessionId,
+                user.Email,
+                user.TokenVersion,
+                roles);
+
+            await _auditService.LogAsync(
+                AuditActionConstants.TenantRegistered,
+                user.Id,
+                tenant.Id,
+                nameof(Tenant),
+                tenant.Id.ToString(),
+                ipAddress: request.IpAddress,
+                userAgent: request.UserAgent,
+                deviceId: request.DeviceId,
+                traceId: request.TraceId,
+                metadataJson: $$"""{"sessionId":"{{refreshToken.SessionId}}","ownerRoleId":"{{ownerRole.Id}}"}""",
+                cancellationToken: cancellationToken);
 
             // 9. SINGLE SAVE ALL
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 10. Return response
+            // 10. Send Verification Email (Catch & Log errors so SMTP failures don't fail registration)
+            try
+            {
+                await _emailService.SendVerificationEmailAsync(
+                    user.Email,
+                    rawVerificationToken,
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to send email verification token to {Email} for UserId: {UserId}",
+                    user.Email,
+                    user.Id);
+            }
+
+            // 11. Return response
             return new AuthResponseDto
             {
                 TenantId = tenant.Id,
                 UserId = user.Id,
+                SessionId = refreshToken.SessionId,
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken.RawToken
             };
         }
     }

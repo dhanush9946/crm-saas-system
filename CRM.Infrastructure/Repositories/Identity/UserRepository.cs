@@ -13,11 +13,18 @@ namespace CRM.Infrastructure.Repositories.Identity
 
         public async Task<User?> GetByEmailAsync(Guid tenantId, string email,CancellationToken cancellationToken)
         {
+            var normalizedEmail = email.Trim().ToUpperInvariant();
             return await _context.Users
                 .FirstOrDefaultAsync(x =>
                     x.TenantId == tenantId &&
-                    x.Email == email,
+                    x.EmailNormalized == normalizedEmail,
                     cancellationToken);
+        }
+
+        public async Task<User?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(x => x.EmailNormalized == normalizedEmail, cancellationToken);
         }
     }
 }

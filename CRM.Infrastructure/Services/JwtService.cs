@@ -19,14 +19,18 @@ namespace CRM.Infrastructure.Services
         public string GenerateToken(
             Guid userId,
             Guid tenantId,
+            Guid sessionId,
             string email,
+            int tokenVersion,
             IEnumerable<string> roles)
         {
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),   
-                new Claim("tenantId", tenantId.ToString()),                   
-                new Claim(JwtRegisteredClaimNames.Email, email)
+                new Claim("tenantId", tenantId.ToString()),
+                new Claim("sessionId", sessionId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim("ver", tokenVersion.ToString())
             };
 
             if (roles != null)

@@ -11,7 +11,7 @@ namespace CRM.Application.Identity.Interfaces
 
         Task<RefreshToken?> GetByTokenAsync(string rawToken,CancellationToken cancellationToken);
 
-        Task<string> CreateAsync(
+        Task<RefreshTokenResult> CreateAsync(
             Guid tenantId,
             Guid userId,
             string? deviceId,
@@ -20,7 +20,7 @@ namespace CRM.Application.Identity.Interfaces
             CancellationToken cancellationToken
         );
 
-        Task<string> RotateAsync(
+        Task<RefreshTokenResult> RotateAsync(
             RefreshToken existingToken,
             Guid tenantId,
             Guid userId,
@@ -32,6 +32,12 @@ namespace CRM.Application.Identity.Interfaces
 
         Task RevokeFamilyAsync(
             Guid tokenFamilyId,
+            CancellationToken cancellationToken
+        );
+
+        Task<int> RevokeAllByUserAsync(
+            Guid tenantId,
+            Guid userId,
             CancellationToken cancellationToken
         );
     }
