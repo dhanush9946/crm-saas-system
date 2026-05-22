@@ -2,6 +2,8 @@ using CRM.API.Requests.Auth;
 using CRM.API.Responses;
 using CRM.Application.Common.Interfaces;
 using CRM.Application.Identity.Commands.Login;
+using CRM.Application.Identity.Commands.ForgotPassword;
+using CRM.Application.Identity.Commands.ResetPassword;
 using CRM.Application.Identity.Commands.Logout;
 using CRM.Application.Identity.Commands.LogoutAll;
 using CRM.Application.Identity.Commands.RefreshTokenFolder;
@@ -216,6 +218,47 @@ namespace CRM.API.Controllers.Identity
             await _mediatr.Send(
                 command,
                 cancellationToken);
+
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [EnableRateLimiting(RateLimitPolicies.LoginPolicy)]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(
+            ForgotPasswordRequestDto request,
+            CancellationToken cancellationToken)
+        {
+            var command = new ForgotPasswordCommand(
+                request.TenantSlug,
+                request.Email,
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                Request.Headers.UserAgent.ToString(),
+                request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                HttpContext.TraceIdentifier);
+
+            await _mediatr.Send(command, cancellationToken);
+
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [EnableRateLimiting(RateLimitPolicies.LoginPolicy)]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(
+            ResetPasswordRequestDto request,
+            CancellationToken cancellationToken)
+        {
+            var command = new ResetPasswordCommand(
+                request.TenantSlug,
+                request.Token,
+                request.NewPassword,
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                Request.Headers.UserAgent.ToString(),
+                request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                HttpContext.TraceIdentifier);
+
+            await _mediatr.Send(command, cancellationToken);
 
             return NoContent();
         }

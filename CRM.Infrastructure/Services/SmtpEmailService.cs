@@ -78,4 +78,38 @@ public sealed class SmtpEmailService : IEmailService
 
         await SendEmailAsync(to, subject, body, cancellationToken);
     }
+
+    public async Task SendPasswordResetEmailAsync(
+        string to,
+        string tenantSlug,
+        string rawToken,
+        CancellationToken cancellationToken = default)
+    {
+        var resetLink =
+            $"{_settings.PasswordResetUrl}?token={Uri.EscapeDataString(rawToken)}&tenant={Uri.EscapeDataString(tenantSlug)}";
+        var subject = "Reset your password";
+        var body = $"""
+            <h2>Password Reset Request</h2>
+            <p>Use the link below to reset your password. If you did not request this, you can safely ignore this email.</p>
+            <a href="{resetLink}">
+                Reset Password
+            </a>
+            """;
+
+        await SendEmailAsync(to, subject, body, cancellationToken);
+    }
+
+    public async Task SendPasswordResetConfirmationEmailAsync(
+        string to,
+        CancellationToken cancellationToken = default)
+    {
+        var subject = "Your password was changed";
+        var body = """
+            <h2>Password Updated</h2>
+            <p>Your password was changed successfully.</p>
+            <p>If you did not perform this action, contact support immediately.</p>
+            """;
+
+        await SendEmailAsync(to, subject, body, cancellationToken);
+    }
 }

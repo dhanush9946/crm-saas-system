@@ -1,4 +1,5 @@
 using CRM.Domain.Common;
+using CRM.Domain.Entities;
 using CRM.Domain.Identity.Enums;
 
 namespace CRM.Domain.Identity.Entities
@@ -33,6 +34,8 @@ namespace CRM.Domain.Identity.Entities
 
         public ICollection<EmailVerificationToken> EmailVerificationTokens { get; private set; }
                                                             = new List<EmailVerificationToken>();
+        public ICollection<PasswordResetToken> PasswordResetTokens { get; private set; }
+                                                            = new List<PasswordResetToken>();
 
 
 

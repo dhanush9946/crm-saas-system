@@ -15,4 +15,6 @@ public sealed class EmailSettings
     public string FromName { get; set; } = default!;
 
     public string VerificationUrl { get; set; } = default!;
+
+    public string PasswordResetUrl { get; set; } = default!;
 }

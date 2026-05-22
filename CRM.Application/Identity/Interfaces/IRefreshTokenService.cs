@@ -34,5 +34,11 @@ namespace CRM.Application.Identity.Interfaces
             Guid tokenFamilyId,
             CancellationToken cancellationToken
         );
+
+        Task<int> RevokeAllByUserAsync(
+            Guid tenantId,
+            Guid userId,
+            CancellationToken cancellationToken
+        );
     }
 }
