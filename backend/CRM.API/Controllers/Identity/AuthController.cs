@@ -1,3 +1,4 @@
+using CRM.API.Helpers;
 using CRM.API.Requests.Auth;
 using CRM.API.Responses;
 using CRM.Application.Common.Interfaces;
@@ -27,14 +28,16 @@ namespace CRM.API.Controllers.Identity
     {
         private readonly IMediator _mediatr;
         private readonly ICurrentUser _currentUser;
+        private readonly IConfiguration _configuration;
 
         public AuthController(
                IMediator mediator,
-               ICurrentUser currentUser
-               )
+               ICurrentUser currentUser,
+               IConfiguration configuration)
         {
             _mediatr = mediator;
             _currentUser = currentUser;
+            _configuration = configuration;
         }
 
         [EnableRateLimiting(RateLimitPolicies.RegisterPolicy)]
@@ -57,9 +60,7 @@ namespace CRM.API.Controllers.Identity
 
             var result = await _mediatr.Send(command, cancellationToken);
 
-            var traceId = HttpContext.TraceIdentifier;
-
-            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
+            return Ok(WriteAuthResponse(result));
         }
 
         [EnableRateLimiting(RateLimitPolicies.LoginPolicy)]
@@ -80,9 +81,7 @@ namespace CRM.API.Controllers.Identity
 
             var result = await _mediatr.Send(command, cancellationToken);
 
-            var traceId = HttpContext.TraceIdentifier;
-
-            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
+            return Ok(WriteAuthResponse(result));
         }
 
         [EnableRateLimiting(RateLimitPolicies.RefreshPolicy)]
@@ -90,10 +89,16 @@ namespace CRM.API.Controllers.Identity
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenRequestDto request, CancellationToken cancellationToken)
         {
+            var refreshToken = ResolveRefreshToken(request.RefreshToken);
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                return Unauthorized();
+            }
+
             var command = new RefreshTokenCommand
             {
-                RefreshToken = request.RefreshToken,
-                DeviceId = request.DeviceId,
+                RefreshToken = refreshToken,
+                DeviceId = request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
                 UserAgent = Request.Headers.UserAgent.ToString(),
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
                 TraceId = HttpContext.TraceIdentifier
@@ -101,9 +106,7 @@ namespace CRM.API.Controllers.Identity
 
             var result = await _mediatr.Send(command, cancellationToken);
 
-            var traceId = HttpContext.TraceIdentifier;
-
-            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result,traceId));
+            return Ok(WriteAuthResponse(result));
         }
 
         [Authorize]
@@ -146,16 +149,22 @@ namespace CRM.API.Controllers.Identity
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(LogoutRequestDto request, CancellationToken cancellationToken)
         {
-            var command = new LogoutCommand
+            var refreshToken = ResolveRefreshToken(request.RefreshToken);
+            if (!string.IsNullOrWhiteSpace(refreshToken))
             {
-                RefreshToken = request.RefreshToken,
-                DeviceId = request.DeviceId,
-                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-                UserAgent = Request.Headers.UserAgent.ToString(),
-                TraceId = HttpContext.TraceIdentifier
-            };
+                var command = new LogoutCommand
+                {
+                    RefreshToken = refreshToken,
+                    DeviceId = request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    UserAgent = Request.Headers.UserAgent.ToString(),
+                    TraceId = HttpContext.TraceIdentifier
+                };
 
-            await _mediatr.Send(command, cancellationToken);
+                await _mediatr.Send(command, cancellationToken);
+            }
+
+            RefreshTokenCookieHelper.Clear(Response, _configuration);
 
             return NoContent();
         }
@@ -175,6 +184,8 @@ namespace CRM.API.Controllers.Identity
             };
 
             await _mediatr.Send(command, cancellationToken);
+
+            RefreshTokenCookieHelper.Clear(Response, _configuration);
 
             return NoContent();
         }
@@ -263,5 +274,26 @@ namespace CRM.API.Controllers.Identity
             return NoContent();
         }
 
+        private string? ResolveRefreshToken(string? bodyToken) =>
+            !string.IsNullOrWhiteSpace(bodyToken)
+                ? bodyToken
+                : RefreshTokenCookieHelper.Get(Request);
+
+        private ApiResponse<AuthPublicResponseDto> WriteAuthResponse(AuthResponseDto result)
+        {
+            var expirationDays = _configuration.GetValue("Jwt:RefreshTokenExpirationDays", 7);
+            RefreshTokenCookieHelper.Set(Response, result.RefreshToken, expirationDays, _configuration);
+
+            var traceId = HttpContext.TraceIdentifier;
+            var publicPayload = new AuthPublicResponseDto
+            {
+                TenantId = result.TenantId,
+                UserId = result.UserId,
+                SessionId = result.SessionId,
+                AccessToken = result.AccessToken,
+            };
+
+            return ApiResponse<AuthPublicResponseDto>.SuccessResponse(publicPayload, traceId);
+        }
     }
 }

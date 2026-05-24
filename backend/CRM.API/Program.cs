@@ -37,6 +37,9 @@ try
     //Rate Limiting
     builder.Services.AddRateLimitingPolicies();
 
+    // CORS for SPA (required for HttpOnly cookie + credentials)
+    builder.Services.AddSpaCors(builder.Configuration);
+
     // API + Swagger
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
@@ -60,6 +63,8 @@ try
     }
 
     app.UseHttpsRedirection();
+
+    app.UseCors(CorsExtensions.SpaPolicy);
 
     app.UseSecurityHeaders();
     app.UseCorrelationId();

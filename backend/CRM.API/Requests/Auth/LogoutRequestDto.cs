@@ -2,7 +2,10 @@ namespace CRM.API.Requests.Auth
 {
     public class LogoutRequestDto
     {
-        public string RefreshToken { get; set; } = null!;
+        /// <summary>
+        /// Optional when refresh token is supplied via HttpOnly cookie.
+        /// </summary>
+        public string? RefreshToken { get; set; }
 
         public string? DeviceId { get; set; }
     }
