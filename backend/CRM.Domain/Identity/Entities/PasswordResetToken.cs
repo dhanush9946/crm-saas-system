@@ -1,7 +1,6 @@
 using CRM.Domain.Common;
-using CRM.Domain.Identity.Entities;
 
-namespace CRM.Domain.Entities;
+namespace CRM.Domain.Identity.Entities;
 
 public sealed class PasswordResetToken : BaseEntity
 {

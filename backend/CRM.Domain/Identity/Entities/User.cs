@@ -1,5 +1,4 @@
 using CRM.Domain.Common;
-using CRM.Domain.Entities;
 using CRM.Domain.Identity.Enums;
 
 namespace CRM.Domain.Identity.Entities

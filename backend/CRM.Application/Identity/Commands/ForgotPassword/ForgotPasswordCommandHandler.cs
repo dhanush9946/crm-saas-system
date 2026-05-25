@@ -1,8 +1,8 @@
 using CRM.Application.Common.Interfaces;
 using CRM.Application.Common.Interfaces.Persistence;
 using CRM.Application.Identity.Interfaces;
-using CRM.Domain.Entities;
 using CRM.Domain.Identity.Constants;
+using CRM.Domain.Identity.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

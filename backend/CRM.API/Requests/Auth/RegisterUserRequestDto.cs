@@ -11,7 +11,5 @@ namespace CRM.API.Requests.Auth
         public string Password { get; set; } = null!;
 
         public string DisplayName { get; set; } = null!;
-
-        public string? DeviceId { get; set; }
     }
 }
