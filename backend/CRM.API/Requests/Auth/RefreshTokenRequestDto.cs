@@ -6,7 +6,5 @@ namespace CRM.API.Requests.Auth
         /// Optional when refresh token is supplied via HttpOnly cookie.
         /// </summary>
         public string? RefreshToken { get; set; }
-
-        public string? DeviceId { get; set; }
     }
 }

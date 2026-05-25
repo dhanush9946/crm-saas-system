@@ -7,7 +7,5 @@ namespace CRM.API.Requests.Auth
         public string Email { get; set; } = null!;
 
         public string Password { get; set; } = null!;
-
-        public string? DeviceId { get; set; }
     }
 }

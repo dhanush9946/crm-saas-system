@@ -4,6 +4,5 @@ namespace CRM.API.Requests.Auth
     {
         public string TenantSlug { get; set; } = null!;
         public string Email { get; set; } = null!;
-        public string? DeviceId { get; set; }
     }
 }

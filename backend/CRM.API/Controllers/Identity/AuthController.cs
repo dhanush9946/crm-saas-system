@@ -52,7 +52,7 @@ namespace CRM.API.Controllers.Identity
                 Email = request.Email,
                 Password = request.Password,
                 DisplayName = request.DisplayName,
-                DeviceId = request.DeviceId,
+                DeviceId = DeviceIdHeaderHelper.GetDeviceId(Request),
                 UserAgent = Request.Headers.UserAgent.ToString(),
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
                 TraceId = HttpContext.TraceIdentifier
@@ -73,7 +73,7 @@ namespace CRM.API.Controllers.Identity
                 TenantSlug = request.TenantSlug,
                 Email = request.Email,
                 Password = request.Password,
-                DeviceId = request.DeviceId,
+                DeviceId = DeviceIdHeaderHelper.GetDeviceId(Request),
                 UserAgent = Request.Headers.UserAgent.ToString(),
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
                 TraceId = HttpContext.TraceIdentifier
@@ -87,9 +87,11 @@ namespace CRM.API.Controllers.Identity
         [EnableRateLimiting(RateLimitPolicies.RefreshPolicy)]
         [AllowAnonymous]
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh(RefreshTokenRequestDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Refresh(
+            [FromBody] RefreshTokenRequestDto? request,
+            CancellationToken cancellationToken)
         {
-            var refreshToken = ResolveRefreshToken(request.RefreshToken);
+            var refreshToken = ResolveRefreshToken(request?.RefreshToken);
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
                 return Unauthorized();
@@ -98,7 +100,7 @@ namespace CRM.API.Controllers.Identity
             var command = new RefreshTokenCommand
             {
                 RefreshToken = refreshToken,
-                DeviceId = request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                DeviceId = DeviceIdHeaderHelper.GetDeviceId(Request),
                 UserAgent = Request.Headers.UserAgent.ToString(),
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
                 TraceId = HttpContext.TraceIdentifier
@@ -118,7 +120,7 @@ namespace CRM.API.Controllers.Identity
                 UserId = _currentUser.UserId,
                 TenantId = _currentUser.TenantId,
                 SessionId = _currentUser.SessionId,
-                DeviceId = Request.Headers["X-Device-Id"].FirstOrDefault()
+                DeviceId = DeviceIdHeaderHelper.GetDeviceId(Request)
             };
 
             var result = await _mediatr.Send(query, cancellationToken);
@@ -147,15 +149,17 @@ namespace CRM.API.Controllers.Identity
 
         [AllowAnonymous]
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout(LogoutRequestDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Logout(
+            [FromBody] LogoutRequestDto? request,
+            CancellationToken cancellationToken)
         {
-            var refreshToken = ResolveRefreshToken(request.RefreshToken);
+            var refreshToken = ResolveRefreshToken(request?.RefreshToken);
             if (!string.IsNullOrWhiteSpace(refreshToken))
             {
                 var command = new LogoutCommand
                 {
                     RefreshToken = refreshToken,
-                    DeviceId = request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                    DeviceId = DeviceIdHeaderHelper.GetDeviceId(Request),
                     IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
                     UserAgent = Request.Headers.UserAgent.ToString(),
                     TraceId = HttpContext.TraceIdentifier
@@ -201,7 +205,7 @@ namespace CRM.API.Controllers.Identity
                 request.Token,
                 HttpContext.Connection.RemoteIpAddress?.ToString(),
                 Request.Headers.UserAgent.ToString(),
-                request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                DeviceIdHeaderHelper.GetDeviceId(Request),
                 HttpContext.TraceIdentifier);
 
             await _mediatr.Send(
@@ -223,7 +227,7 @@ namespace CRM.API.Controllers.Identity
                 request.Email,
                 HttpContext.Connection.RemoteIpAddress?.ToString(),
                 Request.Headers.UserAgent.ToString(),
-                request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                DeviceIdHeaderHelper.GetDeviceId(Request),
                 HttpContext.TraceIdentifier);
 
             await _mediatr.Send(
@@ -245,7 +249,7 @@ namespace CRM.API.Controllers.Identity
                 request.Email,
                 HttpContext.Connection.RemoteIpAddress?.ToString(),
                 Request.Headers.UserAgent.ToString(),
-                request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                DeviceIdHeaderHelper.GetDeviceId(Request),
                 HttpContext.TraceIdentifier);
 
             await _mediatr.Send(command, cancellationToken);
@@ -266,7 +270,7 @@ namespace CRM.API.Controllers.Identity
                 request.NewPassword,
                 HttpContext.Connection.RemoteIpAddress?.ToString(),
                 Request.Headers.UserAgent.ToString(),
-                request.DeviceId ?? Request.Headers["X-Device-Id"].FirstOrDefault(),
+                DeviceIdHeaderHelper.GetDeviceId(Request),
                 HttpContext.TraceIdentifier);
 
             await _mediatr.Send(command, cancellationToken);

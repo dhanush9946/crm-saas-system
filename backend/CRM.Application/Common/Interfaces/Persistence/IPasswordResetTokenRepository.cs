@@ -1,4 +1,4 @@
-using CRM.Domain.Entities;
+using CRM.Domain.Identity.Entities;
 
 namespace CRM.Application.Common.Interfaces.Persistence;
 

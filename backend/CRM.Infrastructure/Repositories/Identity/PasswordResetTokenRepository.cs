@@ -1,5 +1,5 @@
 using CRM.Application.Common.Interfaces.Persistence;
-using CRM.Domain.Entities;
+using CRM.Domain.Identity.Entities;
 using CRM.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
