@@ -2,6 +2,7 @@
 using CRM.Application.Common.Interfaces.Persistence;
 using CRM.Application.Identity.Interfaces;
 using CRM.Infrastructure.Identity;
+using CRM.Infrastructure.Identity.Google;
 using CRM.Infrastructure.Persistence;
 using CRM.Infrastructure.Persistence.Repositories.Identity;
 using CRM.Infrastructure.Repositories.Identity;
@@ -25,6 +26,7 @@ namespace CRM.Infrastructure
 
 
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IExternalLoginRepository, ExternalLoginRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<ITenantRepository, TenantRepository>();
 
@@ -40,6 +42,13 @@ namespace CRM.Infrastructure
 
 
             services.AddScoped<IEmailService, SmtpEmailService>();
+
+            //OAuth Google
+            services.Configure<GoogleAuthOptions>(configuration.GetSection("GoogleAuth"));
+
+            services.AddScoped<IGoogleAuthService,GoogleAuthService>();
+
+
 
 
 

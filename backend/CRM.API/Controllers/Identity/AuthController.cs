@@ -2,7 +2,9 @@ using CRM.API.Helpers;
 using CRM.API.Requests.Auth;
 using CRM.API.Responses;
 using CRM.Application.Common.Interfaces;
+using CRM.Application.Identity.Commands.CompleteGoogleOnboarding;
 using CRM.Application.Identity.Commands.Login;
+using CRM.Application.Identity.Commands.LoginWithGoogle;
 using CRM.Application.Identity.Commands.ForgotPassword;
 using CRM.Application.Identity.Commands.ResetPassword;
 using CRM.Application.Identity.Commands.Logout;
@@ -52,6 +54,77 @@ namespace CRM.API.Controllers.Identity
                 Email = request.Email,
                 Password = request.Password,
                 DisplayName = request.DisplayName,
+                DeviceId = DeviceIdHeaderHelper.GetDeviceId(Request),
+                UserAgent = Request.Headers.UserAgent.ToString(),
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                TraceId = HttpContext.TraceIdentifier
+            };
+
+            var result = await _mediatr.Send(command, cancellationToken);
+
+            return Ok(WriteAuthResponse(result));
+        }
+
+        [EnableRateLimiting(RateLimitPolicies.LoginPolicy)]
+        [AllowAnonymous]
+        [HttpPost("google")]
+        public async Task<IActionResult> LoginWithGoogle(
+            LoginWithGoogleRequestDto request,
+            CancellationToken cancellationToken)
+        {
+            var command = new LoginWithGoogleCommand
+            {
+                IdToken = request.IdToken,
+                DeviceId = DeviceIdHeaderHelper.GetDeviceId(Request),
+                UserAgent = Request.Headers.UserAgent.ToString(),
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                TraceId = HttpContext.TraceIdentifier
+            };
+
+            var result = await _mediatr.Send(command, cancellationToken);
+
+            if (!result.RequiresOnboarding &&
+                !string.IsNullOrWhiteSpace(result.RefreshToken))
+            {
+                var expirationDays = _configuration.GetValue(
+                    "Jwt:RefreshTokenExpirationDays",
+                    7);
+
+                RefreshTokenCookieHelper.Set(
+                    Response,
+                    result.RefreshToken,
+                    expirationDays,
+                    _configuration);
+            }
+
+            var publicResult = new LoginWithGoogleResponse
+            {
+                RequiresOnboarding = result.RequiresOnboarding,
+                AccessToken = result.AccessToken,
+                UserId = result.UserId,
+                TenantId = result.TenantId,
+                SessionId = result.SessionId,
+                Email = result.Email,
+                FullName = result.FullName
+            };
+
+            return Ok(ApiResponse<LoginWithGoogleResponse>.SuccessResponse(
+                publicResult,
+                HttpContext.TraceIdentifier));
+        }
+
+        [EnableRateLimiting(RateLimitPolicies.LoginPolicy)]
+        [AllowAnonymous]
+        [HttpPost("google/onboarding")]
+        public async Task<IActionResult> CompleteGoogleOnboarding(
+            CompleteGoogleOnboardingRequestDto request,
+            CancellationToken cancellationToken)
+        {
+            var command = new CompleteGoogleOnboardingCommand
+            {
+                IdToken = request.IdToken,
+                TenantName = request.TenantName,
+                TenantSlug = request.TenantSlug,
                 DeviceId = DeviceIdHeaderHelper.GetDeviceId(Request),
                 UserAgent = Request.Headers.UserAgent.ToString(),
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),

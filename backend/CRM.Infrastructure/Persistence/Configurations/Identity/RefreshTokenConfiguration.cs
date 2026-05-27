@@ -1,10 +1,8 @@
-﻿
-
-using CRM.Domain.Identity.Entities;
+﻿using CRM.Domain.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace CRM.Infrastructure.Persistence.Configurations
+namespace CRM.Infrastructure.Persistence.Configurations.Identity
 {
     public class RefreshTokenConfiguration:IEntityTypeConfiguration<RefreshToken>
     {

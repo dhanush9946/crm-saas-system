@@ -2,7 +2,7 @@ using CRM.Domain.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace CRM.Infrastructure.Persistence.Configurations;
+namespace CRM.Infrastructure.Persistence.Configurations.Identity;
 
 public sealed class PasswordResetTokenConfiguration
     : IEntityTypeConfiguration<PasswordResetToken>
