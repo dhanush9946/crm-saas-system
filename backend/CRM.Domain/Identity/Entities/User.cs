@@ -35,6 +35,8 @@ namespace CRM.Domain.Identity.Entities
                                                             = new List<EmailVerificationToken>();
         public ICollection<PasswordResetToken> PasswordResetTokens { get; private set; }
                                                             = new List<PasswordResetToken>();
+        public ICollection<ExternalLogin> ExternalLogins { get; private set; }
+                                                            = new List<ExternalLogin>();
 
 
 

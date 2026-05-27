@@ -23,6 +23,7 @@ namespace CRM.Infrastructure.Persistence
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
         public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+        public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
 
 
 
