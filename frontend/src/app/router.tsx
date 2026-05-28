@@ -2,6 +2,9 @@ import { createBrowserRouter } from 'react-router-dom';
 import DashboardLayout from '@app/layouts/DashboardLayout';
 import AuthLayout from '@app/layouts/AuthLayout';
 import ProtectedRoute from '@features/auth/components/ProtectedRoute';
+import GuestRoute from '@features/auth/components/GuestRoute';
+import LoginPage from '@features/auth/pages/LoginPage';
+import RegisterPage from '@features/auth/pages/RegisterPage';
 import { Box, Typography, Button } from '@mui/material';
 
 // -------------------------------------------------------------
@@ -19,26 +22,6 @@ const PlaceholderPage = ({ title, description }: { title: string; description: s
   </Box>
 );
 
-const LoginPagePlaceholder = () => {
-  // Simple fake login dispatcher to demonstrate route protection in action
-  const handleFakeLogin = () => {
-    // In real app, this triggers Redux action
-    alert('Click "Fake Login" to log in. In a real integration, this will trigger the Auth API.');
-  };
-
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'center' }}>
-      <Typography variant="h5" sx={{ fontWeight: 700 }}>Sign In</Typography>
-      <Typography variant="body2" color="text.secondary">Enter credentials to access your CRM tenant</Typography>
-      <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Button variant="contained" fullWidth onClick={handleFakeLogin}>
-          Authenticate Session
-        </Button>
-      </Box>
-    </Box>
-  );
-};
-
 // -------------------------------------------------------------
 // ROUTER ROUTING GRAPH
 // -------------------------------------------------------------
@@ -46,10 +29,14 @@ export const router = createBrowserRouter([
   // Unauthenticated Auth Shell Routes
   {
     path: '/',
-    element: <AuthLayout />,
+    element: (
+      <GuestRoute>
+        <AuthLayout />
+      </GuestRoute>
+    ),
     children: [
-      { path: 'login', element: <LoginPagePlaceholder /> },
-      { path: 'register', element: <PlaceholderPage title="Register" description="Register a new multi-tenant organization subscription." /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'register', element: <RegisterPage /> },
     ],
   },
   // Authenticated Core CRM Shell Routes (Protected)

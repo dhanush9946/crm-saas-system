@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Toaster } from 'react-hot-toast';
 import { store } from '@app/store';
 import { theme } from '@styles/theme';
+import AuthBootstrap from '@features/auth/components/AuthBootstrap';
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {children}
+        <AuthBootstrap>{children}</AuthBootstrap>
         <Toaster
           position="top-right"
           toastOptions={{
