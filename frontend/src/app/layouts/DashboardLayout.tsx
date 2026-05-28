@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import type { RootState } from '@app/store';
-import { logout } from '@features/auth/store/authSlice';
+import { useLogout } from '@features/auth/hooks/useLogout';
 import {
   Box,
   Drawer,
@@ -39,7 +39,7 @@ export const DashboardLayout: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   
   const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const { logout } = useLogout();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -57,8 +57,7 @@ export const DashboardLayout: React.FC = () => {
 
   const handleLogout = () => {
     handleProfileMenuClose();
-    dispatch(logout());
-    navigate('/login');
+    void logout();
   };
 
   const menuItems = [

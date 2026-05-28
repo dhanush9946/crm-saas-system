@@ -2,80 +2,96 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import type { RootState } from '@app/store';
 import { setCredentials, logout } from '@features/auth/store/authSlice';
+import { mapAuthResponseToCredentials } from '@features/auth/services/authSession';
+import { runExclusiveRefresh } from '@features/auth/services/tokenRefreshMutex';
+import { getOrCreateDeviceId } from '@features/auth/utils/deviceId';
+import type { ApiResponse, AuthPublicResponseData } from '@features/auth/types/auth.types';
 
-// Retrieve API Base URL from Vite Environment
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:5001/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
-// Base Query configuring standard fetch behaviors, credentials, and headers
+const AUTH_REFRESH_PATH = '/auth/refresh';
+
+function getRequestUrl(args: string | FetchArgs): string {
+  return typeof args === 'string' ? args : args.url;
+}
+
+function isAuthRefreshRequest(args: string | FetchArgs): boolean {
+  return getRequestUrl(args).includes(AUTH_REFRESH_PATH);
+}
+
 const baseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
+  credentials: 'include',
   prepareHeaders: (headers, { getState }) => {
-    // Cast state to RootState
     const state = getState() as RootState;
     const token = state.auth.accessToken;
     const tenantId = state.auth.tenantId;
 
-    // Attach JWT if authenticated
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
     }
 
-    // Attach Tenant Identifier for multi-tenant backend partitioning
     if (tenantId) {
       headers.set('X-Tenant-Id', tenantId);
     }
+
+    headers.set('X-Device-Id', getOrCreateDeviceId());
 
     return headers;
   },
 });
 
-// Custom baseQuery wrapper to intercept 401 Unauthorized responses and rotate refresh tokens
-const baseQueryWithReauth: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
+async function performSilentRefresh(
+  api: Parameters<BaseQueryFn>[1],
+  extraOptions: Parameters<BaseQueryFn>[2],
+): Promise<boolean> {
+  const refreshResult = await baseQuery(
+    {
+      url: AUTH_REFRESH_PATH,
+      method: 'POST',
+      body: {},
+    },
+    api,
+    extraOptions,
+  );
+
+  const response = refreshResult.data as ApiResponse<AuthPublicResponseData> | undefined;
+
+  if (response?.success && response.data) {
+    const credentials = mapAuthResponseToCredentials(response.data);
+    if (credentials) {
+      api.dispatch(setCredentials(credentials));
+      return true;
+    }
+  }
+
+  api.dispatch(logout());
+  return false;
+}
+
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions,
+) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  // If unauthorized, attempt to perform a silent refresh
-  if (result.error && result.error.status === 401) {
-    // Try to get a new token using the refresh endpoint
-    // Note: HttpOnly Cookie rotation usually handles sending/receiving refresh cookies,
-    // so we call the endpoint without needing explicit body parameters.
-    const refreshResult = await baseQuery(
-      {
-        url: '/identity/refresh-token',
-        method: 'POST',
-      },
-      api,
-      extraOptions
-    );
+  if (result.error?.status !== 401 || isAuthRefreshRequest(args)) {
+    return result;
+  }
 
-    if (refreshResult.data) {
-      // Store the new credentials in Redux
-      const data = refreshResult.data as { accessToken: string; refreshToken?: string; tenantId?: string };
-      api.dispatch(
-        setCredentials({
-          accessToken: data.accessToken,
-          tenantId: data.tenantId || (api.getState() as RootState).auth.tenantId || undefined,
-        })
-      );
+  const refreshed = await runExclusiveRefresh(() => performSilentRefresh(api, extraOptions));
 
-      // Retry the original query with the new token
-      result = await baseQuery(args, api, extraOptions);
-    } else {
-      // Refresh failed or is invalid; force logout user session
-      api.dispatch(logout());
-    }
+  if (refreshed) {
+    result = await baseQuery(args, api, extraOptions);
   }
 
   return result;
 };
 
-// Global API Service definitions
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
   tagTypes: ['User', 'Customer', 'Lead', 'Deal', 'Activity', 'Analytics'],
-  endpoints: () => ({}), // Endpoints will be injected dynamically from features
+  endpoints: () => ({}),
 });
