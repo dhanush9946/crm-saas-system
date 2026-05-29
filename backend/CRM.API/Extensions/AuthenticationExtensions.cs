@@ -1,5 +1,4 @@
 using CRM.API.Responses;
-using CRM.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text;
+using CRM.Infrastructure.Persistence;
 
 namespace CRM.API.Extensions
 {

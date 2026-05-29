@@ -4,7 +4,6 @@ using CRM.API.Middleware;
 using CRM.Application;
 using CRM.Infrastructure;
 using CRM.Infrastructure.Persistence;
-
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
