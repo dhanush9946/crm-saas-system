@@ -1,6 +1,5 @@
 using CRM.Application.Common.Interfaces.Persistence;
 using CRM.Domain.Identity.Entities;
-using CRM.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRM.Infrastructure.Persistence.Repositories.Identity;

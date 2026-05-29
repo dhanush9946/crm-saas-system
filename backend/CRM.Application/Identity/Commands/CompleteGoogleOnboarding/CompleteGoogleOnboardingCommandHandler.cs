@@ -53,114 +53,101 @@ namespace CRM.Application.Identity.Commands.CompleteGoogleOnboarding
                 request.IdToken,
                 cancellationToken);
 
-            await using var transaction =
-                await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
-            try
-            {
-                var existingExternalLogin =
-                    await _externalLoginRepository.GetByProviderAsync(
-                        ExternalLoginProviders.Google,
-                        googleUser.Subject,
-                        cancellationToken);
-
-                if (existingExternalLogin is not null)
-                    throw new ConflictException("Google account is already linked.");
-
-                var existingTenant = await _tenantRepository.GetBySlugAsync(
-                    request.TenantSlug,
-                    cancellationToken);
-
-                if (existingTenant is not null)
-                    throw new ConflictException("Tenant already exists");
-
-                var tenant = Tenant.Create(
-                    request.TenantName,
-                    request.TenantSlug);
-
-                var user = User.Create(
-                    tenant.Id,
-                    googleUser.Email,
-                    googleUser.Name);
-
-                if (googleUser.EmailVerified)
-                {
-                    user.MarkEmailVerified();
-                }
-
-                const string roleName = RoleConstants.Owner;
-
-                var ownerRole = Role.Create(tenant.Id, roleName, true);
-
-                var userRole = UserRole.Create(
-                    tenant.Id,
-                    user.Id,
-                    ownerRole.Id);
-
-                var externalLogin = ExternalLogin.Create(
-                    tenant.Id,
-                    user.Id,
+            var existingExternalLogin =
+                await _externalLoginRepository.GetByProviderAsync(
                     ExternalLoginProviders.Google,
                     googleUser.Subject,
-                    googleUser.Email);
-
-                await _tenantRepository.AddAsync(tenant, cancellationToken);
-                await _userRepository.AddAsync(user, cancellationToken);
-                await _roleRepository.AddAsync(ownerRole, cancellationToken);
-                await _userRoleRepository.AddAsync(userRole, cancellationToken);
-                await _externalLoginRepository.AddAsync(
-                    externalLogin,
                     cancellationToken);
 
-                var refreshToken = await _refreshTokenService.CreateAsync(
-                    user.TenantId,
-                    user.Id,
-                    request.DeviceId,
-                    request.UserAgent,
-                    request.IpAddress,
-                    cancellationToken);
+            if (existingExternalLogin is not null)
+                throw new ConflictException("Google account is already linked.");
 
-                var roles = new List<string> { roleName };
+            var existingTenant = await _tenantRepository.GetBySlugAsync(
+                request.TenantSlug,
+                cancellationToken);
 
-                var accessToken = _jwtService.GenerateToken(
-                    user.Id,
-                    user.TenantId,
-                    refreshToken.SessionId,
-                    user.Email,
-                    user.TokenVersion,
-                    roles);
+            if (existingTenant is not null)
+                throw new ConflictException("Tenant already exists");
 
-                await _auditService.LogAsync(
-                    AuditActionConstants.TenantRegistered,
-                    user.Id,
-                    tenant.Id,
-                    nameof(Tenant),
-                    tenant.Id.ToString(),
-                    ipAddress: request.IpAddress,
-                    userAgent: request.UserAgent,
-                    deviceId: request.DeviceId,
-                    traceId: request.TraceId,
-                    metadataJson: $$"""{"sessionId":"{{refreshToken.SessionId}}","provider":"{{ExternalLoginProviders.Google}}","ownerRoleId":"{{ownerRole.Id}}"}""",
-                    cancellationToken: cancellationToken);
+            var tenant = Tenant.Create(
+                request.TenantName,
+                request.TenantSlug);
 
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            var user = User.Create(
+                tenant.Id,
+                googleUser.Email,
+                googleUser.Name);
 
-                await transaction.CommitAsync(cancellationToken);
-
-                return new CompleteGoogleOnboardingResponse
-                {
-                    TenantId = tenant.Id,
-                    UserId = user.Id,
-                    SessionId = refreshToken.SessionId,
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken.RawToken
-                };
-            }
-            catch
+            if (googleUser.EmailVerified)
             {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
+                user.MarkEmailVerified();
             }
+
+            const string roleName = RoleConstants.Owner;
+
+            var ownerRole = Role.Create(tenant.Id, roleName, true);
+
+            var userRole = UserRole.Create(
+                tenant.Id,
+                user.Id,
+                ownerRole.Id);
+
+            var externalLogin = ExternalLogin.Create(
+                tenant.Id,
+                user.Id,
+                ExternalLoginProviders.Google,
+                googleUser.Subject,
+                googleUser.Email);
+
+            await _tenantRepository.AddAsync(tenant, cancellationToken);
+            await _userRepository.AddAsync(user, cancellationToken);
+            await _roleRepository.AddAsync(ownerRole, cancellationToken);
+            await _userRoleRepository.AddAsync(userRole, cancellationToken);
+            await _externalLoginRepository.AddAsync(
+                externalLogin,
+                cancellationToken);
+
+            var refreshToken = await _refreshTokenService.CreateAsync(
+                user.TenantId,
+                user.Id,
+                request.DeviceId,
+                request.UserAgent,
+                request.IpAddress,
+                cancellationToken);
+
+            var roles = new List<string> { roleName };
+
+            var accessToken = _jwtService.GenerateToken(
+                user.Id,
+                user.TenantId,
+                refreshToken.SessionId,
+                user.Email,
+                user.TokenVersion,
+                roles);
+
+            await _auditService.LogAsync(
+                AuditActionConstants.TenantRegistered,
+                user.Id,
+                tenant.Id,
+                nameof(Tenant),
+                tenant.Id.ToString(),
+                ipAddress: request.IpAddress,
+                userAgent: request.UserAgent,
+                deviceId: request.DeviceId,
+                traceId: request.TraceId,
+                metadataJson: $$"""{"sessionId":"{{refreshToken.SessionId}}","provider":"{{ExternalLoginProviders.Google}}","ownerRoleId":"{{ownerRole.Id}}"}""",
+                cancellationToken: cancellationToken);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return new CompleteGoogleOnboardingResponse
+            {
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                SessionId = refreshToken.SessionId,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.RawToken
+            };
         }
     }
 }
