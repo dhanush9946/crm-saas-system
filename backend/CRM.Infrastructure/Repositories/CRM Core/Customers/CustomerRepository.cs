@@ -1,5 +1,6 @@
 ﻿using CRM.Application.CRM.Customers.Interfaces;
 using CRM.Domain.CRM.Entities;
+using CRM.Domain.Identity.Entities;
 using CRM.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,13 +25,15 @@ public sealed class CustomerRepository : ICustomerRepository
     }
 
     public async Task<Customer?> GetByIdAsync(
+        Guid tenantId,
         Guid customerId,
         CancellationToken cancellationToken = default)
     {
         return await _context.Customers
-            .FirstOrDefaultAsync(
-                x => x.Id == customerId,
-                cancellationToken);
+    .FirstOrDefaultAsync(
+        x => x.Id == customerId &&
+             x.TenantId == tenantId,
+        cancellationToken);
     }
 
     public async Task<bool> ExistsAsync(
@@ -50,5 +53,91 @@ public sealed class CustomerRepository : ICustomerRepository
         _context.Customers.Update(customer);
     }
 
-   
+
+
+    //this method for get Customers query
+
+    public async Task<(IReadOnlyList<Customer> Customers, int TotalCount)>
+    GetPagedAsync(
+        Guid tenantId,
+        string? search,
+        string? sortBy,
+        string? sortDirection,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        IQueryable<Customer> query = _context.Customers
+            .AsNoTracking()
+            .Where(x =>
+                x.TenantId == tenantId &&
+                !x.IsDeleted);
+
+        //---------------------------------
+        // Search
+        //---------------------------------
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+
+            query = query.Where(x =>
+                EF.Functions.Like(
+                    x.Name,
+                    $"%{search}%")
+                ||
+                (x.Industry != null &&
+                 EF.Functions.Like(
+                     x.Industry,
+                     $"%{search}%"))
+                ||
+                (x.Website != null &&
+                 EF.Functions.Like(
+                     x.Website,
+                     $"%{search}%")));
+                    }
+
+        //---------------------------------
+        // Sorting
+        //---------------------------------
+
+        var descending =
+            string.Equals(
+                sortDirection,
+                "desc",
+                StringComparison.OrdinalIgnoreCase);
+
+        query = sortBy?.ToLower() switch
+        {
+            "name" => descending
+                ? query.OrderByDescending(x => x.Name)
+                : query.OrderBy(x => x.Name),
+
+            "createdatutc" => descending
+                ? query.OrderByDescending(x => x.CreatedAtUtc)
+                : query.OrderBy(x => x.CreatedAtUtc),
+
+            _ => query.OrderByDescending(x => x.CreatedAtUtc)
+        };
+
+        //---------------------------------
+        // Count
+        //---------------------------------
+
+        var totalCount = await query.CountAsync(
+            cancellationToken);
+
+        //---------------------------------
+        // Paging
+        //---------------------------------
+
+        var customers = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (customers, totalCount);
+    }
+
+
 }

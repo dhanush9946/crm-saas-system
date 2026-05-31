@@ -80,6 +80,12 @@ namespace CRM.API.Middleware
                     response.Message = ex.Message;
                     break;
 
+                case NotFoundException:
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response.ErrorCode = "NOT_FOUND";
+                    response.Message = ex.Message;
+                    break;
+
                 default:
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     response.ErrorCode = "INTERNAL_SERVER_ERROR";

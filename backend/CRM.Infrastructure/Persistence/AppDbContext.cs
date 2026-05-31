@@ -1,4 +1,5 @@
 using CRM.Domain.Common;
+using CRM.Domain.CRM.Entities;
 using CRM.Domain.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -12,6 +13,8 @@ namespace CRM.Infrastructure.Persistence
 
         }
 
+        //Identity
+
         public DbSet<User> Users => Set<User>();
 
         public DbSet<Tenant> Tenants => Set<Tenant>();
@@ -24,6 +27,11 @@ namespace CRM.Infrastructure.Persistence
         public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
         public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
         public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
+
+
+        //CRM Core 
+
+        public DbSet<Customer> Customers => Set<Customer>();
 
 
 

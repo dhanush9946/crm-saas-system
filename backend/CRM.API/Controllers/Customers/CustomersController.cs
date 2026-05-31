@@ -65,4 +65,25 @@ public sealed class CustomersController : ControllerBase
                     result,
                     HttpContext.TraceIdentifier));
     }
+
+    [HttpGet("{customerId:guid}")]
+    public async Task<IActionResult> GetById(
+    Guid customerId,
+    CancellationToken cancellationToken)
+    {
+        var query = new GetCustomerByIdQuery
+        {
+            CustomerId = customerId
+        };
+
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<CustomerDetailsDto>
+                .SuccessResponse(
+                    result,
+                    HttpContext.TraceIdentifier));
+    }
 }
