@@ -9,8 +9,9 @@ public interface ICustomerRepository
         CancellationToken cancellationToken = default);
 
     Task<Customer?> GetByIdAsync(
-        Guid customerId,
-        CancellationToken cancellationToken = default);
+    Guid tenantId,
+    Guid customerId,
+    CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(
         Guid tenantId,
@@ -19,5 +20,15 @@ public interface ICustomerRepository
 
     void Update(Customer customer);
 
-   
+    Task<(IReadOnlyList<Customer> Customers, int TotalCount)>
+    GetPagedAsync(
+        Guid tenantId,
+        string? search,
+        string? sortBy,
+        string? sortDirection,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken);
+
+
 }
