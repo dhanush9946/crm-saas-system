@@ -36,7 +36,8 @@ public sealed class CustomerRepository : ICustomerRepository
         cancellationToken);
     }
 
-    public async Task<bool> ExistsAsync(
+    //This is for Create customer,checking the customer name is already exists.
+    public async Task<bool> CustomerNameExistsAsync(
         Guid tenantId,
         string name,
         CancellationToken cancellationToken = default)
@@ -45,6 +46,21 @@ public sealed class CustomerRepository : ICustomerRepository
             x => x.TenantId == tenantId &&
                  x.Name == name &&
                  !x.IsDeleted,
+            cancellationToken);
+    }
+
+    //This is for Update customer,checking the customer name exist in the tenant with defferent customer id.
+    public async Task<bool> CustomerNameExistsForOtherCustomerAsync(
+    Guid tenantId,
+    Guid customerId,
+    string name,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Customers.AnyAsync(
+            x => x.TenantId == tenantId
+                 && x.Id != customerId
+                 && x.Name == name
+                 && !x.IsDeleted,
             cancellationToken);
     }
 

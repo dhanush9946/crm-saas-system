@@ -3,6 +3,7 @@ using CRM.API.Responses;
 using CRM.API.Responses.Customers;
 using CRM.Application.Common.Models;
 using CRM.Application.CRM.Customers.Commands.CreateCustomer;
+using CRM.Application.CRM.Customers.Commands.UpdateCustomer;
 using CRM.Application.CRM.Customers.DTOs;
 using CRM.Application.CRM.Customers.Queries.GetCustomers;
 using MediatR;
@@ -85,5 +86,32 @@ public sealed class CustomersController : ControllerBase
                 .SuccessResponse(
                     result,
                     HttpContext.TraceIdentifier));
+    }
+
+
+    [HttpPut("{customerId:guid}")]
+    public async Task<IActionResult> UpdateCustomer(
+    Guid customerId,
+    [FromBody] UpdateCustomerRequest request,
+    CancellationToken cancellationToken)
+    {
+        var command = new UpdateCustomerCommand
+        {
+            CustomerId = customerId,
+            Name = request.Name,
+            Industry = request.Industry,
+            Website = request.Website,
+            OwnerUserId = request.OwnerUserId,
+            RowVersion = request.RowVersion
+        };
+
+        await _mediator.Send(
+            command,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Customer updated successfully.",
+                HttpContext.TraceIdentifier));
     }
 }

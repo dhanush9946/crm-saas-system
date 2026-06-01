@@ -44,7 +44,9 @@ public sealed class GetCustomerByIdHandler
             Status = customer.Status.ToString(),
             OwnerUserId = customer.OwnerUserId,
             CreatedAtUtc = customer.CreatedAtUtc,
-            UpdatedAtUtc = customer.UpdatedAtUtc
+            UpdatedAtUtc = customer.UpdatedAtUtc,
+            RowVersion = Convert.ToBase64String(
+                                customer.RowVersion!)
         };
     }
 }

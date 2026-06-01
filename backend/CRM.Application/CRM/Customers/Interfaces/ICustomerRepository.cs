@@ -13,10 +13,17 @@ public interface ICustomerRepository
     Guid customerId,
     CancellationToken cancellationToken = default);
 
-    Task<bool> ExistsAsync(
+    Task<bool> CustomerNameExistsAsync(
+    Guid tenantId,
+    string name,
+    CancellationToken cancellationToken);
+
+    Task<bool> CustomerNameExistsForOtherCustomerAsync(
         Guid tenantId,
+        Guid customerId,
         string name,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken);
+
 
     void Update(Customer customer);
 

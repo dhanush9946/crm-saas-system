@@ -26,7 +26,7 @@ public sealed class CreateCustomerHandler
         CreateCustomerCommand request,
         CancellationToken cancellationToken)
     {
-        var exists = await _customerRepository.ExistsAsync(
+        var exists = await _customerRepository.CustomerNameExistsAsync(
             _currentUser.TenantId,
             request.Name,
             cancellationToken);
