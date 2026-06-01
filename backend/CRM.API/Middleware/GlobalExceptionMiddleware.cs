@@ -3,6 +3,7 @@ using System.Text.Json;
 using FluentValidation;
 using CRM.API.Responses;
 using CRM.Application.Common.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRM.API.Middleware
 {
@@ -85,6 +86,15 @@ namespace CRM.API.Middleware
                     response.ErrorCode = "NOT_FOUND";
                     response.Message = ex.Message;
                     break;
+
+                case DbUpdateConcurrencyException: // Handles EF Core's concurrency exception
+                case ConcurrencyException:         // Handles your custom application exception
+                    context.Response.StatusCode = StatusCodes.Status409Conflict;
+                    response.ErrorCode = "CONCURRENCY_CONFLICT";
+                    response.Message = "The record has been modified or deleted by another user since it was loaded. Please reload and try again.";
+                    break;
+
+
 
                 default:
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

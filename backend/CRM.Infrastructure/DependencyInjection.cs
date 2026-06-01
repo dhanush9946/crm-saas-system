@@ -73,6 +73,11 @@ namespace CRM.Infrastructure
             //AuditLog
             services.AddScoped<IAuditService, AuditService>();
 
+            //Concurency checking service
+            services.AddScoped<IConcurrencyService, ConcurrencyService>();
+
+
+
 
             return services;
         }

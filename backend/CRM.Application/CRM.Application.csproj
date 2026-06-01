@@ -17,7 +17,6 @@
     <Folder Include="CRM\Activities\Commands\" />
     <Folder Include="CRM\Activities\DTOs\" />
     <Folder Include="CRM\Activities\Queries\" />
-    <Folder Include="CRM\Customers\Commands\" />
     <Folder Include="CRM\Deals\Commands\" />
     <Folder Include="CRM\Deals\DTOs\" />
     <Folder Include="CRM\Deals\Queries\" />
