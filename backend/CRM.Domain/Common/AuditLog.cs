@@ -1,4 +1,4 @@
-﻿namespace CRM.Domain.Identity.Entities;
+﻿namespace CRM.Domain.Common;
 
 public sealed class AuditLog
 {

@@ -4,6 +4,7 @@ using CRM.API.Middleware;
 using CRM.Application;
 using CRM.Infrastructure;
 using CRM.Infrastructure.Persistence;
+using CRM.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -18,12 +19,17 @@ try
     var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
-    // Database
-    builder.Services.AddDbContext<AppDbContext>(options =>
+    // DbContext
+    builder.Services.AddDbContext<AppDbContext>(
+    (serviceProvider, options) =>
+    {
         options.UseSqlServer(
             defaultConnectionString,
-            sql => sql.EnableRetryOnFailure()
-        ));
+            sql => sql.EnableRetryOnFailure());
+
+        options.AddInterceptors(
+            serviceProvider.GetRequiredService<AuditInterceptor>());
+    });
 
     // Application & Infrastructure
     builder.Services.AddApplicationServices();
