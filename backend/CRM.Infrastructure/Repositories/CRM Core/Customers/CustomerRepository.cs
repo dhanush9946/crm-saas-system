@@ -32,8 +32,24 @@ public sealed class CustomerRepository : ICustomerRepository
         return await _context.Customers
     .FirstOrDefaultAsync(
         x => x.Id == customerId &&
-             x.TenantId == tenantId,
+             x.TenantId == tenantId &&
+             !x.IsDeleted,
         cancellationToken);
+    }
+
+    //for restore customer
+    public async Task<Customer?> GetDeletedByIdAsync(
+    Guid tenantId,
+    Guid customerId,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Customers
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(
+                x => x.Id == customerId &&
+                     x.TenantId == tenantId &&
+                     x.IsDeleted,
+                cancellationToken);
     }
 
     //This is for Create customer,checking the customer name is already exists.
@@ -64,10 +80,7 @@ public sealed class CustomerRepository : ICustomerRepository
             cancellationToken);
     }
 
-    public void Update(Customer customer)
-    {
-        _context.Customers.Update(customer);
-    }
+    
 
 
 
