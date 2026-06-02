@@ -1,5 +1,5 @@
 using CRM.Application.Common.Interfaces;
-using CRM.Domain.Identity.Entities;
+using CRM.Domain.Common;
 using CRM.Infrastructure.Persistence;
 
 namespace CRM.Infrastructure.Services;

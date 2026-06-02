@@ -7,6 +7,8 @@ using CRM.Application.CRM.Customers.Commands.DeleteCustomer;
 using CRM.Application.CRM.Customers.Commands.UpdateCustomer;
 using CRM.Application.CRM.Customers.DTOs;
 using CRM.Application.CRM.Customers.Queries.GetCustomers;
+using CRM.Application.Customers.DTOs;
+using CRM.Application.Customers.Queries.GetCustomerHistory;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -145,5 +147,27 @@ public sealed class CustomersController : ControllerBase
             cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpGet("{customerId:guid}/history")]
+    [ProducesResponseType(typeof(PagedResult<CustomerHistoryDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetHistory(
+    Guid customerId,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetCustomerHistoryQuery
+        {
+            CustomerId = customerId,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
+        return Ok(result);
     }
 }

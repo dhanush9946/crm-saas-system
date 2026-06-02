@@ -5,6 +5,8 @@ using CRM.Application.Identity.Interfaces;
 using CRM.Infrastructure.Identity;
 using CRM.Infrastructure.Identity.Google;
 using CRM.Infrastructure.Persistence;
+using CRM.Infrastructure.Persistence.Interceptors;
+using CRM.Infrastructure.Persistence.Repositories;
 using CRM.Infrastructure.Persistence.Repositories.Identity;
 using CRM.Infrastructure.Repositories;
 using CRM.Infrastructure.Repositories.Identity;
@@ -70,11 +72,17 @@ namespace CRM.Infrastructure
 
             services.AddScoped<ICurrentUser, CurrentUser>();
 
-            //AuditLog
+            //AuditLog identity
             services.AddScoped<IAuditService, AuditService>();
+
+            //Auditlog Repository
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
             //Concurency checking service
             services.AddScoped<IConcurrencyService, ConcurrencyService>();
+
+            //Audit log intercepter
+            services.AddScoped<AuditInterceptor>();
 
 
 

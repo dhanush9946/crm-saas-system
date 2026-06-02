@@ -56,8 +56,8 @@ public sealed class CustomerConfiguration
         builder.HasIndex(x => new
         {
             x.TenantId,
-            x.Name,
-            x.IsDeleted
+            x.IsDeleted,
+            x.Name
         })
         .HasDatabaseName("IX_Customers_Tenant_Name");
 
