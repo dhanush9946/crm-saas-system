@@ -33,7 +33,6 @@
 
   <ItemGroup>
     <Folder Include="Controllers\Customers\" />
-    <Folder Include="Controllers\Leads\" />
     <Folder Include="Controllers\Deals\" />
     <Folder Include="Controllers\Activities\" />
     <Folder Include="Controllers\Analytics\" />

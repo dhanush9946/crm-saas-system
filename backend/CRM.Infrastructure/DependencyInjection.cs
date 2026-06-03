@@ -1,6 +1,7 @@
 ﻿using CRM.Application.Common.Interfaces;
 using CRM.Application.Common.Interfaces.Persistence;
 using CRM.Application.CRM.Customers.Interfaces;
+using CRM.Application.CRM.Leads.Interfaces;
 using CRM.Application.Identity.Interfaces;
 using CRM.Infrastructure.Identity;
 using CRM.Infrastructure.Identity.Google;
@@ -59,6 +60,9 @@ namespace CRM.Infrastructure
 
             //Customer Repository
             services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+            //Lead Repository
+            services.AddScoped<ILeadRepository, LeadRepository>();
 
 
             // Generic repository

@@ -32,7 +32,7 @@ namespace CRM.Infrastructure.Persistence
         //CRM Core 
 
         public DbSet<Customer> Customers => Set<Customer>();
-
+        public DbSet<Lead> Leads => Set<Lead>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
