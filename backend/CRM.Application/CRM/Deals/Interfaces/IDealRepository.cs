@@ -23,8 +23,10 @@ public interface IDealRepository
     Task<(IReadOnlyList<Deal> Deals, int TotalCount)>
         GetPagedAsync(
             Guid tenantId,
+            string? search,
             DealStage? stage,
             Guid? ownerUserId,
+            Guid? customerId,
             DateOnly? expectedCloseFrom,
             DateOnly? expectedCloseTo,
             string? sortBy,
