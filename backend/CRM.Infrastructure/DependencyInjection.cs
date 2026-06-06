@@ -1,5 +1,6 @@
 ﻿using CRM.Application.Common.Interfaces;
 using CRM.Application.Common.Interfaces.Persistence;
+using CRM.Application.CRM.Activities.Interfaces;
 using CRM.Application.CRM.Customers.Interfaces;
 using CRM.Application.CRM.Deals.Interfaces;
 using CRM.Application.CRM.Leads.Interfaces;
@@ -11,6 +12,7 @@ using CRM.Infrastructure.Persistence.Interceptors;
 using CRM.Infrastructure.Persistence.Repositories;
 using CRM.Infrastructure.Persistence.Repositories.Identity;
 using CRM.Infrastructure.Repositories;
+using CRM.Infrastructure.Repositories.CRMCore.Activities;
 using CRM.Infrastructure.Repositories.CRMCore.Deals;
 using CRM.Infrastructure.Repositories.Identity;
 using CRM.Infrastructure.Services;
@@ -68,6 +70,11 @@ namespace CRM.Infrastructure
 
             //Deal Repository
             services.AddScoped<IDealRepository, DealRepository>();
+
+            //Activity Repository
+            services.AddScoped<IActivityRepository, ActivityRepository>();
+
+
 
 
             // Generic repository
