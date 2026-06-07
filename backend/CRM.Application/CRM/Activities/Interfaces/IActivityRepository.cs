@@ -20,16 +20,18 @@ public interface IActivityRepository
         CancellationToken cancellationToken = default);
 
     Task<(IReadOnlyList<Activity> Activities, int TotalCount)>
-        GetPagedAsync(
-            Guid tenantId,
-            RelatedEntityType? relatedEntityType,
-            Guid? relatedEntityId,
-            ActivityType? activityType,
-            DateTime? dueFrom,
-            DateTime? dueTo,
-            string? sortBy,
-            string? sortDirection,
-            int page,
-            int pageSize,
-            CancellationToken cancellationToken);
+    GetPagedAsync(
+        Guid tenantId,
+        string? search,
+        RelatedEntityType? relatedEntityType,
+        Guid? relatedEntityId,
+        ActivityType? activityType,
+        bool? isCompleted,
+        DateTime? dueFrom,
+        DateTime? dueTo,
+        string? sortBy,
+        string? sortDirection,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

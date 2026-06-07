@@ -34,7 +34,6 @@
   <ItemGroup>
     <Folder Include="Controllers\Customers\" />
     <Folder Include="Controllers\Deals\" />
-    <Folder Include="Controllers\Activities\" />
     <Folder Include="Controllers\Analytics\" />
     <Folder Include="Filters\" />
   </ItemGroup>
