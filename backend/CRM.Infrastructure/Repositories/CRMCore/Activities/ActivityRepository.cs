@@ -49,20 +49,22 @@ namespace CRM.Infrastructure.Repositories.CRMCore.Activities
         }
 
         public async Task<
-       (IReadOnlyList<Activity> Activities,
-       int TotalCount)>
-       GetPagedAsync(
-           Guid tenantId,
-           RelatedEntityType? relatedEntityType,
-           Guid? relatedEntityId,
-           ActivityType? activityType,
-           DateTime? dueFrom,
-           DateTime? dueTo,
-           string? sortBy,
-           string? sortDirection,
-           int page,
-           int pageSize,
-           CancellationToken cancellationToken)
+    (IReadOnlyList<Activity> Activities,
+    int TotalCount)>
+    GetPagedAsync(
+        Guid tenantId,
+        string? search,
+        RelatedEntityType? relatedEntityType,
+        Guid? relatedEntityId,
+        ActivityType? activityType,
+        bool? isCompleted,
+        DateTime? dueFrom,
+        DateTime? dueTo,
+        string? sortBy,
+        string? sortDirection,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
         {
             IQueryable<Activity> query =
                 _context.Activities
@@ -72,45 +74,66 @@ namespace CRM.Infrastructure.Repositories.CRMCore.Activities
                         !x.IsDeleted);
 
             //---------------------------------
+            // Search
+            //---------------------------------
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
+                query = query.Where(x =>
+                    EF.Functions.Like(
+                        x.Subject,
+                        $"%{search}%")
+                    ||
+                    (x.Notes != null &&
+                     EF.Functions.Like(
+                         x.Notes,
+                         $"%{search}%")));
+            }
+
+            //---------------------------------
             // Filters
             //---------------------------------
 
             if (relatedEntityType.HasValue)
             {
                 query = query.Where(
-                    x =>
-                        x.RelatedEntityType ==
-                        relatedEntityType.Value);
+                    x => x.RelatedEntityType ==
+                         relatedEntityType.Value);
             }
 
             if (relatedEntityId.HasValue)
             {
                 query = query.Where(
-                    x =>
-                        x.RelatedEntityId ==
-                        relatedEntityId.Value);
+                    x => x.RelatedEntityId ==
+                         relatedEntityId.Value);
             }
 
             if (activityType.HasValue)
             {
                 query = query.Where(
-                    x =>
-                        x.Type ==
-                        activityType.Value);
+                    x => x.Type ==
+                         activityType.Value);
+            }
+
+            if (isCompleted.HasValue)
+            {
+                query = isCompleted.Value
+                    ? query.Where(x => x.CompletedAtUtc != null)
+                    : query.Where(x => x.CompletedAtUtc == null);
             }
 
             if (dueFrom.HasValue)
             {
                 query = query.Where(
-                    x =>
-                        x.DueAtUtc >= dueFrom.Value);
+                    x => x.DueAtUtc >= dueFrom.Value);
             }
 
             if (dueTo.HasValue)
             {
                 query = query.Where(
-                    x =>
-                        x.DueAtUtc <= dueTo.Value);
+                    x => x.DueAtUtc <= dueTo.Value);
             }
 
             //---------------------------------
@@ -126,40 +149,28 @@ namespace CRM.Infrastructure.Repositories.CRMCore.Activities
             query = sortBy?.ToLower() switch
             {
                 "subject" => descending
-                    ? query.OrderByDescending(
-                        x => x.Subject)
-                    : query.OrderBy(
-                        x => x.Subject),
+                    ? query.OrderByDescending(x => x.Subject)
+                    : query.OrderBy(x => x.Subject),
 
                 "type" => descending
-                    ? query.OrderByDescending(
-                        x => x.Type)
-                    : query.OrderBy(
-                        x => x.Type),
+                    ? query.OrderByDescending(x => x.Type)
+                    : query.OrderBy(x => x.Type),
 
                 "occurredatutc" => descending
-                    ? query.OrderByDescending(
-                        x => x.OccurredAtUtc)
-                    : query.OrderBy(
-                        x => x.OccurredAtUtc),
+                    ? query.OrderByDescending(x => x.OccurredAtUtc)
+                    : query.OrderBy(x => x.OccurredAtUtc),
 
                 "dueatutc" => descending
-                    ? query.OrderByDescending(
-                        x => x.DueAtUtc)
-                    : query.OrderBy(
-                        x => x.DueAtUtc),
+                    ? query.OrderByDescending(x => x.DueAtUtc)
+                    : query.OrderBy(x => x.DueAtUtc),
 
                 "completedatutc" => descending
-                    ? query.OrderByDescending(
-                        x => x.CompletedAtUtc)
-                    : query.OrderBy(
-                        x => x.CompletedAtUtc),
+                    ? query.OrderByDescending(x => x.CompletedAtUtc)
+                    : query.OrderBy(x => x.CompletedAtUtc),
 
                 "createdatutc" => descending
-                    ? query.OrderByDescending(
-                        x => x.CreatedAtUtc)
-                    : query.OrderBy(
-                        x => x.CreatedAtUtc),
+                    ? query.OrderByDescending(x => x.CreatedAtUtc)
+                    : query.OrderBy(x => x.CreatedAtUtc),
 
                 _ => query.OrderByDescending(
                     x => x.CreatedAtUtc)
