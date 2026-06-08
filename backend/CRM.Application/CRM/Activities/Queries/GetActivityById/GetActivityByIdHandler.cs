@@ -52,7 +52,9 @@ public sealed class GetActivityByIdHandler
             CreatedByUserId = activity.CreatedByUserId,
             CreatedAtUtc = activity.CreatedAtUtc,
             UpdatedAtUtc = activity.UpdatedAtUtc,
-            RowVersion = activity.RowVersion
+            RowVersion = activity.RowVersion is null
+                         ? string.Empty
+                         : Convert.ToBase64String(activity.RowVersion)
         };
     }
 }

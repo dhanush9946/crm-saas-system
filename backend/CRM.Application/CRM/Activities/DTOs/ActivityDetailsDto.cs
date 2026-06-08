@@ -28,5 +28,5 @@ public sealed class ActivityDetailsDto
 
     public DateTime? UpdatedAtUtc { get; init; }
 
-    public byte[]? RowVersion { get; init; }
+    public string RowVersion { get; init; } = string.Empty;
 }

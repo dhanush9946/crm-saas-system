@@ -94,4 +94,31 @@ public sealed class ActivitiesController : ControllerBase
                     result,
                     HttpContext.TraceIdentifier));
     }
+
+    [HttpPut("{activityId:guid}")]
+    public async Task<IActionResult> UpdateActivity(
+    Guid activityId,
+    [FromBody] UpdateActivityRequestDto request,
+    CancellationToken cancellationToken)
+    {
+        var command = new UpdateActivityCommand
+        {
+            ActivityId = activityId,
+            Type = request.Type,
+            Subject = request.Subject,
+            Notes = request.Notes,
+            OccurredAtUtc = request.OccurredAtUtc,
+            DueAtUtc = request.DueAtUtc,
+            RowVersion = request.RowVersion
+        };
+
+        await _mediator.Send(
+            command,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Activity updated successfully.",
+                HttpContext.TraceIdentifier));
+    }
 }
