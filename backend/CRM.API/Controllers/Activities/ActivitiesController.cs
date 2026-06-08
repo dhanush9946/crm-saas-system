@@ -4,6 +4,7 @@ using CRM.API.Responses.Activities;
 using CRM.Application.Common.Models;
 using CRM.Application.CRM.Activities.Commands.CreateActivity;
 using CRM.Application.CRM.Activities.DTOs;
+using CRM.Application.CRM.Activities.Queries.GetActivityById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -68,6 +69,27 @@ public sealed class ActivitiesController : ControllerBase
 
         return Ok(
             ApiResponse<PagedResult<ActivityDto>>
+                .SuccessResponse(
+                    result,
+                    HttpContext.TraceIdentifier));
+    }
+
+    [HttpGet("{activityId:guid}")]
+    public async Task<IActionResult> GetById(
+    Guid activityId,
+    CancellationToken cancellationToken)
+    {
+        var query = new GetActivityByIdQuery
+        {
+            ActivityId = activityId
+        };
+
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<ActivityDetailsDto>
                 .SuccessResponse(
                     result,
                     HttpContext.TraceIdentifier));
