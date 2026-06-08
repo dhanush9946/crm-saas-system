@@ -2,6 +2,7 @@
 using CRM.API.Responses;
 using CRM.API.Responses.Activities;
 using CRM.Application.Common.Models;
+using CRM.Application.CRM.Activities.Commands.CompleteActivity;
 using CRM.Application.CRM.Activities.Commands.CreateActivity;
 using CRM.Application.CRM.Activities.DTOs;
 using CRM.Application.CRM.Activities.Queries.GetActivityById;
@@ -119,6 +120,26 @@ public sealed class ActivitiesController : ControllerBase
         return Ok(
             ApiResponse<string>.SuccessResponse(
                 "Activity updated successfully.",
+                HttpContext.TraceIdentifier));
+    }
+
+    [HttpPatch("{activityId:guid}/complete")]
+    public async Task<IActionResult> CompleteActivity(
+    Guid activityId,
+    [FromBody] CompleteActivityRequestDto request,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new CompleteActivityCommand
+            {
+                ActivityId = activityId,
+                RowVersion = request.RowVersion
+            },
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Activity completed successfully.",
                 HttpContext.TraceIdentifier));
     }
 }
