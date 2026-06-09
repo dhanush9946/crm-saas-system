@@ -4,6 +4,7 @@ using CRM.API.Responses.Activities;
 using CRM.Application.Common.Models;
 using CRM.Application.CRM.Activities.Commands.CompleteActivity;
 using CRM.Application.CRM.Activities.Commands.CreateActivity;
+using CRM.Application.CRM.Activities.Commands.DeleteActivity;
 using CRM.Application.CRM.Activities.DTOs;
 using CRM.Application.CRM.Activities.Queries.GetActivityById;
 using MediatR;
@@ -141,5 +142,22 @@ public sealed class ActivitiesController : ControllerBase
             ApiResponse<string>.SuccessResponse(
                 "Activity completed successfully.",
                 HttpContext.TraceIdentifier));
+    }
+
+    [HttpDelete("{activityId:guid}")]
+    public async Task<IActionResult> DeleteActivity(
+    Guid activityId,
+    [FromBody] DeleteActivityRequestDto request,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new DeleteActivityCommand
+            {
+                ActivityId = activityId,
+                RowVersion = request.RowVersion
+            },
+            cancellationToken);
+
+        return NoContent();
     }
 }
