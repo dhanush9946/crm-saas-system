@@ -1,8 +1,9 @@
 ﻿using CRM.Domain.Common;
 using CRM.Domain.CRM.Enums;
+using CRM.Domain.Common.Interfaces;
 
 namespace CRM.Domain.CRM.Entities;
-public sealed class Customer : BaseEntity
+public sealed class Customer : BaseEntity,IAuditable
 {
     public const int MaxNameLength = 200;
 

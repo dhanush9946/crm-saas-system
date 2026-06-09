@@ -3,9 +3,12 @@ using CRM.API.Responses;
 using CRM.API.Responses.Customers;
 using CRM.Application.Common.Models;
 using CRM.Application.CRM.Customers.Commands.CreateCustomer;
+using CRM.Application.CRM.Customers.Commands.DeleteCustomer;
 using CRM.Application.CRM.Customers.Commands.UpdateCustomer;
 using CRM.Application.CRM.Customers.DTOs;
 using CRM.Application.CRM.Customers.Queries.GetCustomers;
+using CRM.Application.Customers.DTOs;
+using CRM.Application.Customers.Queries.GetCustomerHistory;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -113,5 +116,58 @@ public sealed class CustomersController : ControllerBase
             ApiResponse<string>.SuccessResponse(
                 "Customer updated successfully.",
                 HttpContext.TraceIdentifier));
+    }
+
+
+    [HttpDelete("{customerId:guid}")]
+    public async Task<IActionResult> DeleteCustomer(
+    Guid customerId,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new DeleteCustomerCommand
+            {
+                CustomerId = customerId
+            },
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{customerId:guid}/restore")]
+    public async Task<IActionResult> RestoreCustomer(
+    Guid customerId,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new RestoreCustomerCommand
+            {
+                CustomerId = customerId
+            },
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpGet("{customerId:guid}/history")]
+    [ProducesResponseType(typeof(PagedResult<CustomerHistoryDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetHistory(
+    Guid customerId,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetCustomerHistoryQuery
+        {
+            CustomerId = customerId,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
+        return Ok(result);
     }
 }

@@ -1,4 +1,4 @@
-using CRM.Domain.Identity.Entities;
+using CRM.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -56,5 +56,14 @@ public sealed class AuditLogConfiguration
         builder.HasIndex(x => new { x.TenantId, x.Action, x.CreatedAtUtc });
 
         builder.HasIndex(x => x.CreatedAtUtc);
+
+        builder.HasIndex(x => new
+        {
+            x.TenantId,
+            x.EntityType,
+            x.EntityId,
+            x.CreatedAtUtc
+        })
+        .HasDatabaseName("IX_AuditLogs_EntityHistory");
     }
 }

@@ -22,6 +22,70 @@ namespace CRM.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CRM.Domain.CRM.Entities.Activity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DueAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("OccurredAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RelatedEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RelatedEntityType")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "DueAtUtc");
+
+                    b.HasIndex("TenantId", "RelatedEntityType", "RelatedEntityId");
+
+                    b.ToTable("Activities", (string)null);
+                });
+
             modelBuilder.Entity("CRM.Domain.CRM.Entities.Customer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -74,13 +138,167 @@ namespace CRM.Infrastructure.Migrations
                     b.HasIndex("TenantId", "Status")
                         .HasDatabaseName("IX_Customers_Tenant_Status");
 
-                    b.HasIndex("TenantId", "Name", "IsDeleted")
+                    b.HasIndex("TenantId", "IsDeleted", "Name")
                         .HasDatabaseName("IX_Customers_Tenant_Name");
 
                     b.ToTable("Customers", (string)null);
                 });
 
-            modelBuilder.Entity("CRM.Domain.Identity.Entities.AuditLog", b =>
+            modelBuilder.Entity("CRM.Domain.CRM.Entities.Deal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ExpectedCloseDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid?>("LeadId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("OwnerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Probability")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Value")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CustomerId")
+                        .HasDatabaseName("IX_Deals_Tenant_Customer");
+
+                    b.HasIndex("TenantId", "ExpectedCloseDate")
+                        .HasDatabaseName("IX_Deals_Tenant_CloseDate");
+
+                    b.HasIndex("TenantId", "OwnerUserId")
+                        .HasDatabaseName("IX_Deals_Tenant_Owner");
+
+                    b.HasIndex("TenantId", "IsDeleted", "Stage")
+                        .HasDatabaseName("IX_Deals_Tenant_Stage");
+
+                    b.ToTable("Deals", (string)null);
+                });
+
+            modelBuilder.Entity("CRM.Domain.CRM.Entities.Lead", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Company")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(320)
+                        .HasColumnType("nvarchar(320)");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("OwnerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<decimal?>("Score")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("ScoreVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Email")
+                        .HasDatabaseName("IX_Leads_Tenant_Email");
+
+                    b.HasIndex("TenantId", "Source")
+                        .HasDatabaseName("IX_Leads_Tenant_Source");
+
+                    b.HasIndex("TenantId", "IsDeleted", "Status")
+                        .HasDatabaseName("IX_Leads_Tenant_Status");
+
+                    b.ToTable("Leads", (string)null);
+                });
+
+            modelBuilder.Entity("CRM.Domain.Common.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -147,6 +365,9 @@ namespace CRM.Infrastructure.Migrations
                     b.HasIndex("UserId", "CreatedAtUtc");
 
                     b.HasIndex("TenantId", "Action", "CreatedAtUtc");
+
+                    b.HasIndex("TenantId", "EntityType", "EntityId", "CreatedAtUtc")
+                        .HasDatabaseName("IX_AuditLogs_EntityHistory");
 
                     b.ToTable("AuditLogs", (string)null);
                 });

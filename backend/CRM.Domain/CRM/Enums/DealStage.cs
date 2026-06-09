@@ -1,0 +1,11 @@
+﻿
+namespace CRM.Domain.CRM.Enums;
+
+public enum DealStage
+{
+    Qualification = 1,
+    Proposal = 2,
+    Negotiation=3,
+    Won = 4,
+    Lost = 5
+}
