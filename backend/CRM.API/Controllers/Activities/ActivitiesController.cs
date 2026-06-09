@@ -8,6 +8,7 @@ using CRM.Application.CRM.Activities.Commands.DeleteActivity;
 using CRM.Application.CRM.Activities.Commands.RestoreActivity;
 using CRM.Application.CRM.Activities.DTOs;
 using CRM.Application.CRM.Activities.Queries.GetActivityById;
+using CRM.Application.CRM.Activities.Queries.GetActivityHistory;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -175,5 +176,29 @@ public sealed class ActivitiesController : ControllerBase
             cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpGet("{activityId:guid}/history")]
+    [ProducesResponseType(
+    typeof(PagedResult<ActivityHistoryDto>),
+    StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetHistory(
+    Guid activityId,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetActivityHistoryQuery
+        {
+            ActivityId = activityId,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
+        return Ok(result);
     }
 }
