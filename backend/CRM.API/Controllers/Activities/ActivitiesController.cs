@@ -5,6 +5,7 @@ using CRM.Application.Common.Models;
 using CRM.Application.CRM.Activities.Commands.CompleteActivity;
 using CRM.Application.CRM.Activities.Commands.CreateActivity;
 using CRM.Application.CRM.Activities.Commands.DeleteActivity;
+using CRM.Application.CRM.Activities.Commands.RestoreActivity;
 using CRM.Application.CRM.Activities.DTOs;
 using CRM.Application.CRM.Activities.Queries.GetActivityById;
 using MediatR;
@@ -155,6 +156,21 @@ public sealed class ActivitiesController : ControllerBase
             {
                 ActivityId = activityId,
                 RowVersion = request.RowVersion
+            },
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{activityId:guid}/restore")]
+    public async Task<IActionResult> RestoreActivity(
+    Guid activityId,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new RestoreActivityCommand
+            {
+                ActivityId = activityId
             },
             cancellationToken);
 
