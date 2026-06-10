@@ -195,4 +195,4 @@ public sealed class DealsController : ControllerBase
 
         return Ok(result);
     }
-}
+

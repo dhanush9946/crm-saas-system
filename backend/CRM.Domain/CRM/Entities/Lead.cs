@@ -36,6 +36,11 @@ public sealed class Lead : BaseEntity, IAuditable
     public string? ScoreVersion { get; private set; }
 
     public Guid? OwnerUserId { get; private set; }
+    public Guid? ConvertedCustomerId { get; private set; }
+
+    public Guid? ConvertedByUserId { get; private set; }
+
+    public DateTime? ConvertedAtUtc { get; private set; }
 
     public bool IsDeleted { get; private set; }
 
@@ -297,5 +302,47 @@ public sealed class Lead : BaseEntity, IAuditable
             throw new InvalidOperationException(
                 "Deleted lead cannot be modified.");
         }
+    }
+
+
+
+    public void ConvertToCustomer(
+    Guid customerId,
+    Guid convertedByUserId,
+    DateTime convertedAtUtc)
+    {
+        EnsureNotDeleted();
+
+        if (customerId == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "CustomerId is required.");
+        }
+
+        if (convertedByUserId == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "ConvertedByUserId is required.");
+        }
+
+        if (Status != LeadStatus.Qualified)
+        {
+            throw new InvalidOperationException(
+                "Only qualified leads can be converted.");
+        }
+
+        if (ConvertedCustomerId.HasValue)
+        {
+            throw new InvalidOperationException(
+                "Lead has already been converted.");
+        }
+
+        ConvertedCustomerId = customerId;
+        ConvertedByUserId = convertedByUserId;
+        ConvertedAtUtc = convertedAtUtc;
+
+        Status = LeadStatus.Converted;
+
+        SetUpdated();
     }
 }

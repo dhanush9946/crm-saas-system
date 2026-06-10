@@ -68,11 +68,15 @@ namespace CRM.Infrastructure
             //Lead Repository
             services.AddScoped<ILeadRepository, LeadRepository>();
 
+            //Lead Conversion History
+            services.AddScoped<ILeadConversionHistoryRepository, LeadConversionHistoryRepository>();
+
             //Deal Repository
             services.AddScoped<IDealRepository, DealRepository>();
 
             //Activity Repository
             services.AddScoped<IActivityRepository, ActivityRepository>();
+
 
 
 
