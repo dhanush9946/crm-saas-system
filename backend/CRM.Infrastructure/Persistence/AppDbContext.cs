@@ -34,6 +34,9 @@ namespace CRM.Infrastructure.Persistence
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Lead> Leads => Set<Lead>();
 
+        public DbSet<LeadConversionHistory> LeadConversionHistories
+                                     => Set<LeadConversionHistory>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

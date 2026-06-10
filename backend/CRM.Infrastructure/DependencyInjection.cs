@@ -64,6 +64,20 @@ namespace CRM.Infrastructure
             //Lead Repository
             services.AddScoped<ILeadRepository, LeadRepository>();
 
+<<<<<<< Updated upstream
+=======
+            //Lead Conversion History
+            services.AddScoped<ILeadConversionHistoryRepository, LeadConversionHistoryRepository>();
+
+            //Deal Repository
+            services.AddScoped<IDealRepository, DealRepository>();
+
+            //Activity Repository
+            services.AddScoped<IActivityRepository, ActivityRepository>();
+
+
+
+>>>>>>> Stashed changes
 
             // Generic repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

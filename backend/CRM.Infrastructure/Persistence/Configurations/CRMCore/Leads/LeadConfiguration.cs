@@ -47,6 +47,12 @@ public sealed class LeadConfiguration
 
         builder.Property(x => x.OwnerUserId);
 
+        builder.Property(x => x.ConvertedCustomerId);
+
+        builder.Property(x => x.ConvertedByUserId);
+
+        builder.Property(x => x.ConvertedAtUtc);
+
         builder.Property(x => x.IsDeleted)
             .HasDefaultValue(false);
 
