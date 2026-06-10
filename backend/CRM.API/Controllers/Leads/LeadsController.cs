@@ -2,6 +2,7 @@ using CRM.API.Requests.Leads;
 using CRM.API.Responses;
 using CRM.API.Responses.Leads;
 using CRM.Application.Common.Models;
+using CRM.Application.CRM.Leads.Commands.ChangeLeadStatus;
 using CRM.Application.CRM.Leads.Commands.ConvertLeadToCustomer;
 using CRM.Application.CRM.Leads.Commands.CreateLead;
 using CRM.Application.CRM.Leads.Commands.DeleteLead;
@@ -179,8 +180,8 @@ public sealed class LeadsController : ControllerBase
 
     [HttpPost("{leadId:guid}/convert")]
     public async Task<IActionResult> ConvertToCustomer(
-Guid leadId,
-CancellationToken cancellationToken)
+    Guid leadId,
+    CancellationToken cancellationToken)
     {
         var command = new ConvertLeadToCustomerCommand
         {
@@ -196,5 +197,26 @@ CancellationToken cancellationToken)
                 .SuccessResponse(
                     result,
                     HttpContext.TraceIdentifier));
+    }
+
+
+    [HttpPatch("{leadId:guid}/status")]
+    public async Task<IActionResult> ChangeStatus(
+    Guid leadId,
+    [FromBody] ChangeLeadStatusRequest request,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new ChangeLeadStatusCommand
+            {
+                LeadId = leadId,
+                Status = request.Status
+            },
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Lead status updated successfully.",
+                HttpContext.TraceIdentifier));
     }
 }

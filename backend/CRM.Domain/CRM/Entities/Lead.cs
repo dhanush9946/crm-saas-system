@@ -129,16 +129,49 @@ public sealed class Lead : BaseEntity, IAuditable
         SetUpdated();
     }
 
-    public void ChangeStatus(LeadStatus status)
+    public void ChangeStatus(LeadStatus newStatus)
     {
         EnsureNotDeleted();
 
-        if (Status == status)
+        if (Status == newStatus)
+        {
             return;
+        }
 
-        Status = status;
+        if (!IsValidStatusTransition(Status, newStatus))
+        {
+            throw new InvalidOperationException(
+                $"Cannot change lead status from {Status} to {newStatus}.");
+        }
+
+        Status = newStatus;
 
         SetUpdated();
+    }
+
+    private static bool IsValidStatusTransition(
+        LeadStatus currentStatus,
+        LeadStatus newStatus)
+    {
+        return currentStatus switch
+        {
+            LeadStatus.New =>
+                newStatus == LeadStatus.Contacted ||
+                newStatus == LeadStatus.Lost,
+
+            LeadStatus.Contacted =>
+                newStatus == LeadStatus.Qualified ||
+                newStatus == LeadStatus.Lost,
+
+            LeadStatus.Qualified =>
+                newStatus == LeadStatus.Lost,
+
+            LeadStatus.Converted => false,
+
+            LeadStatus.Lost => false,
+
+            _ => false
+        };
     }
 
     public void AssignOwner(Guid? ownerUserId)
