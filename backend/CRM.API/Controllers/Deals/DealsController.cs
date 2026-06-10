@@ -11,7 +11,6 @@ using CRM.Application.CRM.Deals.DTOs;
 using CRM.Application.CRM.Deals.Queries.GetDealById;
 using CRM.Application.CRM.Deals.Queries.GetDealHistory;
 using CRM.Application.CRM.Deals.Queries.GetDeals;
-using CRM.Application.CRM.Leads.Commands.ConvertLeadToCustomer;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -197,5 +196,3 @@ public sealed class DealsController : ControllerBase
         return Ok(result);
     }
 
-
-}

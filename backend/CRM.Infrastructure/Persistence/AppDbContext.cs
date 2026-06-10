@@ -33,6 +33,8 @@ namespace CRM.Infrastructure.Persistence
 
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Lead> Leads => Set<Lead>();
+        public DbSet<Deal> Deals => Set<Deal>();
+        public DbSet<Activity> Activities => Set<Activity>();
 
         public DbSet<LeadConversionHistory> LeadConversionHistories
                                      => Set<LeadConversionHistory>();

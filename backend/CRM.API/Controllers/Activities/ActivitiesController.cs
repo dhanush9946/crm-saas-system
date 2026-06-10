@@ -1,0 +1,204 @@
+﻿using CRM.API.Requests.Activities;
+using CRM.API.Responses;
+using CRM.API.Responses.Activities;
+using CRM.Application.Common.Models;
+using CRM.Application.CRM.Activities.Commands.CompleteActivity;
+using CRM.Application.CRM.Activities.Commands.CreateActivity;
+using CRM.Application.CRM.Activities.Commands.DeleteActivity;
+using CRM.Application.CRM.Activities.Commands.RestoreActivity;
+using CRM.Application.CRM.Activities.DTOs;
+using CRM.Application.CRM.Activities.Queries.GetActivityById;
+using CRM.Application.CRM.Activities.Queries.GetActivityHistory;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CRM.API.Controllers.Activities;
+
+[ApiController]
+[Route("api/v1/activities")]
+[Authorize]
+public sealed class ActivitiesController : ControllerBase
+{
+    private readonly IMediator _mediator;
+
+    public ActivitiesController(
+        IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        CreateActivityRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var command = new CreateActivityCommand
+        {
+            Type = request.Type,
+            Subject = request.Subject,
+            Notes = request.Notes,
+            OccurredAtUtc = request.OccurredAtUtc,
+            DueAtUtc = request.DueAtUtc,
+            RelatedEntityType = request.RelatedEntityType,
+            RelatedEntityId = request.RelatedEntityId
+        };
+
+        var activityId =
+            await _mediator.Send(
+                command,
+                cancellationToken);
+
+        var response =
+            new CreateActivityResponseDto
+            {
+                ActivityId = activityId
+            };
+
+        return Ok(
+            ApiResponse<CreateActivityResponseDto>
+                .SuccessResponse(
+                    response,
+                    HttpContext.TraceIdentifier));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetActivities(
+    [FromQuery] GetActivitiesQuery query,
+    CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<PagedResult<ActivityDto>>
+                .SuccessResponse(
+                    result,
+                    HttpContext.TraceIdentifier));
+    }
+
+    [HttpGet("{activityId:guid}")]
+    public async Task<IActionResult> GetById(
+    Guid activityId,
+    CancellationToken cancellationToken)
+    {
+        var query = new GetActivityByIdQuery
+        {
+            ActivityId = activityId
+        };
+
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<ActivityDetailsDto>
+                .SuccessResponse(
+                    result,
+                    HttpContext.TraceIdentifier));
+    }
+
+    [HttpPut("{activityId:guid}")]
+    public async Task<IActionResult> UpdateActivity(
+    Guid activityId,
+    [FromBody] UpdateActivityRequestDto request,
+    CancellationToken cancellationToken)
+    {
+        var command = new UpdateActivityCommand
+        {
+            ActivityId = activityId,
+            Type = request.Type,
+            Subject = request.Subject,
+            Notes = request.Notes,
+            OccurredAtUtc = request.OccurredAtUtc,
+            DueAtUtc = request.DueAtUtc,
+            RowVersion = request.RowVersion
+        };
+
+        await _mediator.Send(
+            command,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Activity updated successfully.",
+                HttpContext.TraceIdentifier));
+    }
+
+    [HttpPatch("{activityId:guid}/complete")]
+    public async Task<IActionResult> CompleteActivity(
+    Guid activityId,
+    [FromBody] CompleteActivityRequestDto request,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new CompleteActivityCommand
+            {
+                ActivityId = activityId,
+                RowVersion = request.RowVersion
+            },
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Activity completed successfully.",
+                HttpContext.TraceIdentifier));
+    }
+
+    [HttpDelete("{activityId:guid}")]
+    public async Task<IActionResult> DeleteActivity(
+    Guid activityId,
+    [FromBody] DeleteActivityRequestDto request,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new DeleteActivityCommand
+            {
+                ActivityId = activityId,
+                RowVersion = request.RowVersion
+            },
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{activityId:guid}/restore")]
+    public async Task<IActionResult> RestoreActivity(
+    Guid activityId,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new RestoreActivityCommand
+            {
+                ActivityId = activityId
+            },
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpGet("{activityId:guid}/history")]
+    [ProducesResponseType(
+    typeof(PagedResult<ActivityHistoryDto>),
+    StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetHistory(
+    Guid activityId,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetActivityHistoryQuery
+        {
+            ActivityId = activityId,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
+        return Ok(result);
+    }
+}

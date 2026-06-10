@@ -1,6 +1,8 @@
 ﻿using CRM.Application.Common.Interfaces;
 using CRM.Application.Common.Interfaces.Persistence;
+using CRM.Application.CRM.Activities.Interfaces;
 using CRM.Application.CRM.Customers.Interfaces;
+using CRM.Application.CRM.Deals.Interfaces;
 using CRM.Application.CRM.Leads.Interfaces;
 using CRM.Application.Identity.Interfaces;
 using CRM.Infrastructure.Identity;
@@ -10,6 +12,8 @@ using CRM.Infrastructure.Persistence.Interceptors;
 using CRM.Infrastructure.Persistence.Repositories;
 using CRM.Infrastructure.Persistence.Repositories.Identity;
 using CRM.Infrastructure.Repositories;
+using CRM.Infrastructure.Repositories.CRMCore.Activities;
+using CRM.Infrastructure.Repositories.CRMCore.Deals;
 using CRM.Infrastructure.Repositories.Identity;
 using CRM.Infrastructure.Services;
 using CRM.Infrastructure.Settings;
@@ -64,8 +68,6 @@ namespace CRM.Infrastructure
             //Lead Repository
             services.AddScoped<ILeadRepository, LeadRepository>();
 
-<<<<<<< Updated upstream
-=======
             //Lead Conversion History
             services.AddScoped<ILeadConversionHistoryRepository, LeadConversionHistoryRepository>();
 
@@ -77,7 +79,7 @@ namespace CRM.Infrastructure
 
 
 
->>>>>>> Stashed changes
+
 
             // Generic repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
