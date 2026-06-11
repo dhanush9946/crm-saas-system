@@ -1,9 +1,9 @@
 ﻿using CRM.Application.Common.Exceptions;
 using CRM.Application.Common.Interfaces;
 using CRM.Application.CRM.Customers.Interfaces;
-using CRM.Application.CRM.Leads.DTOs;
 using CRM.Application.CRM.Leads.Interfaces;
 using CRM.Domain.CRM.Entities;
+using CRM.Domain.CRM.Enums;
 using MediatR;
 
 namespace CRM.Application.CRM.Leads.Commands.ConvertLeadToCustomer;
@@ -94,7 +94,8 @@ public sealed class ConvertLeadToCustomerHandler
         var history = LeadConversionHistory.Create(
             tenantId: _currentUser.TenantId,
             leadId: lead.Id,
-            customerId: customer.Id,
+            conversionType: LeadConversionType.Customer,
+            relatedEntityId: customer.Id,
             convertedByUserId: _currentUser.UserId,
             convertedAtUtc: utcNow);
 
