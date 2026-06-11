@@ -2,6 +2,7 @@ using CRM.API.Requests.Leads;
 using CRM.API.Responses;
 using CRM.API.Responses.Leads;
 using CRM.Application.Common.Models;
+using CRM.Application.CRM.Leads.Commands.AssignLead;
 using CRM.Application.CRM.Leads.Commands.ChangeLeadStatus;
 using CRM.Application.CRM.Leads.Commands.ConvertLeadToCustomer;
 using CRM.Application.CRM.Leads.Commands.CreateLead;
@@ -217,6 +218,26 @@ public sealed class LeadsController : ControllerBase
         return Ok(
             ApiResponse<string>.SuccessResponse(
                 "Lead status updated successfully.",
+                HttpContext.TraceIdentifier));
+    }
+
+    [HttpPatch("{leadId:guid}/assign")]
+    public async Task<IActionResult> AssignLead(
+    Guid leadId,
+    [FromBody] AssignLeadRequest request,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new AssignLeadCommand
+            {
+                LeadId = leadId,
+                OwnerUserId = request.OwnerUserId
+            },
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Lead assigned successfully.",
                 HttpContext.TraceIdentifier));
     }
 }

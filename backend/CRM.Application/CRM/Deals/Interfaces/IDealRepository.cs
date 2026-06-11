@@ -20,6 +20,12 @@ public interface IDealRepository
         Guid dealId,
         CancellationToken cancellationToken = default);
 
+    Task<bool> ExistsForLeadAndTitleAsync(
+    Guid tenantId,
+    Guid leadId,
+    string title,
+    CancellationToken cancellationToken = default);
+
     Task<(IReadOnlyList<Deal> Deals, int TotalCount)>
         GetPagedAsync(
             Guid tenantId,

@@ -28,7 +28,10 @@ public sealed class LeadConversionHistoryConfiguration
         builder.Property(x => x.LeadId)
             .IsRequired();
 
-        builder.Property(x => x.CustomerId)
+        builder.Property(x => x.ConversionType)
+            .IsRequired();
+
+        builder.Property(x => x.RelatedEntityId)
             .IsRequired();
 
         builder.Property(x => x.ConvertedByUserId)
@@ -52,10 +55,11 @@ public sealed class LeadConversionHistoryConfiguration
         builder.HasIndex(x => new
         {
             x.TenantId,
-            x.CustomerId
+            x.ConversionType,
+            x.RelatedEntityId
         })
         .HasDatabaseName(
-            "IX_LeadConversionHistories_Tenant_Customer");
+            "IX_LeadConversionHistories_Tenant_Conversion");
 
         builder.HasIndex(x => new
         {

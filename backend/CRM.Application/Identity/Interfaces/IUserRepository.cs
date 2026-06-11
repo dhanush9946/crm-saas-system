@@ -11,5 +11,10 @@ namespace CRM.Application.Identity.Interfaces
     {
         Task<User?> GetByEmailAsync(Guid tenantId, string email,CancellationToken cancellationToken);
         Task<User?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken);
+
+        Task<User?> GetByIdAsync(
+            Guid tenantId,
+            Guid userId,
+            CancellationToken cancellationToken);
     }
 }

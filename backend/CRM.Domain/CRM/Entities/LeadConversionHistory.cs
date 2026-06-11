@@ -1,4 +1,5 @@
 ﻿using CRM.Domain.Common;
+using CRM.Domain.CRM.Enums;
 
 namespace CRM.Domain.CRM.Entities;
 
@@ -8,7 +9,9 @@ public sealed class LeadConversionHistory : BaseEntity
 
     public Guid LeadId { get; private set; }
 
-    public Guid CustomerId { get; private set; }
+    public LeadConversionType ConversionType { get; private set; }
+
+    public Guid RelatedEntityId { get; private set; }
 
     public Guid ConvertedByUserId { get; private set; }
 
@@ -21,23 +24,26 @@ public sealed class LeadConversionHistory : BaseEntity
     private LeadConversionHistory(
         Guid tenantId,
         Guid leadId,
-        Guid customerId,
+        LeadConversionType conversionType,
+        Guid relatedEntityId,
         Guid convertedByUserId,
         DateTime convertedAtUtc)
     {
         TenantId = tenantId;
         LeadId = leadId;
-        CustomerId = customerId;
+        ConversionType = conversionType;
+        RelatedEntityId = relatedEntityId;
         ConvertedByUserId = convertedByUserId;
         ConvertedAtUtc = convertedAtUtc;
     }
 
     public static LeadConversionHistory Create(
-        Guid tenantId,
-        Guid leadId,
-        Guid customerId,
-        Guid convertedByUserId,
-        DateTime convertedAtUtc)
+    Guid tenantId,
+    Guid leadId,
+    LeadConversionType conversionType,
+    Guid relatedEntityId,
+    Guid convertedByUserId,
+    DateTime convertedAtUtc)
     {
         if (tenantId == Guid.Empty)
             throw new ArgumentException("TenantId is required.");
@@ -45,8 +51,8 @@ public sealed class LeadConversionHistory : BaseEntity
         if (leadId == Guid.Empty)
             throw new ArgumentException("LeadId is required.");
 
-        if (customerId == Guid.Empty)
-            throw new ArgumentException("CustomerId is required.");
+        if (relatedEntityId == Guid.Empty)
+            throw new ArgumentException("RelatedEntityId is required.");
 
         if (convertedByUserId == Guid.Empty)
             throw new ArgumentException("ConvertedByUserId is required.");
@@ -54,7 +60,8 @@ public sealed class LeadConversionHistory : BaseEntity
         return new LeadConversionHistory(
             tenantId,
             leadId,
-            customerId,
+            conversionType,
+            relatedEntityId,
             convertedByUserId,
             convertedAtUtc);
     }

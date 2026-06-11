@@ -42,6 +42,30 @@ namespace CRM.Infrastructure.Repositories.CRMCore.Deals
         }
 
 
+        public async Task<bool> ExistsForLeadAndTitleAsync(
+    Guid tenantId,
+    Guid leadId,
+    string title,
+    CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return false;
+            }
+
+            title = title.Trim();
+
+            return await _context.Deals
+                .AsNoTracking()
+                .AnyAsync(
+                    x => x.TenantId == tenantId &&
+                         x.LeadId == leadId &&
+                         !x.IsDeleted &&
+                         x.Title == title,
+                    cancellationToken);
+        }
+
+
         public async Task<(IReadOnlyList<Deal> Deals, int TotalCount)>
         GetPagedAsync(
             Guid tenantId,

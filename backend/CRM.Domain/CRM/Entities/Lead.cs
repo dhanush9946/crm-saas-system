@@ -378,4 +378,23 @@ public sealed class Lead : BaseEntity, IAuditable
 
         SetUpdated();
     }
+
+    public bool CanConvertToDeal()
+    {
+        EnsureNotDeleted();
+
+        return Status == LeadStatus.Qualified
+               || Status == LeadStatus.Converted;
+    }
+
+    public void EnsureCanConvertToDeal()
+    {
+        EnsureNotDeleted();
+
+        if (!ConvertedCustomerId.HasValue)
+        {
+            throw new InvalidOperationException(
+                "The lead must be converted to a customer before it can be converted to a deal.");
+        }
+    }
 }
