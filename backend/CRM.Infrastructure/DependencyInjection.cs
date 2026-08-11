@@ -57,6 +57,15 @@ namespace CRM.Infrastructure
 
             services.AddScoped<IGoogleAuthService,GoogleAuthService>();
 
+            // Access token state validation
+            services.AddScoped<IAccessTokenStateValidator, DatabaseAccessTokenStateValidator>();
+
+
+            //lead  assignment user validation
+            services.AddScoped<IUserAssignmentValidator, DatabaseUserAssignmentValidator>();
+
+
+
 
 
 

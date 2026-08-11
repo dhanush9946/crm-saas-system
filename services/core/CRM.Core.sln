@@ -1,0 +1,26 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36717.8
+MinimumVisualStudioVersion = 10.0.40219.1
+# -----------------------------------------------------------------------
+# CRM.Core Service Solution — Phase 0 Structural Placeholder
+# -----------------------------------------------------------------------
+# No projects are added yet. Core CRM business logic extraction
+# (Leads, Customers, Deals, Activities) occurs in Phase 3+
+# of the microservices migration plan.
+# -----------------------------------------------------------------------
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {11111111-2222-3333-4444-555555555502}
+	EndGlobalSection
+EndGlobal
