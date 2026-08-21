@@ -36,6 +36,9 @@ namespace CRM.Infrastructure.Persistence
         public DbSet<Deal> Deals => Set<Deal>();
         public DbSet<Activity> Activities => Set<Activity>();
 
+        public DbSet<LeadConversionHistory> LeadConversionHistories
+                                     => Set<LeadConversionHistory>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

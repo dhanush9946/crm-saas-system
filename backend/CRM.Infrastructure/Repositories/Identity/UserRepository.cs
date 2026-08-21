@@ -26,5 +26,19 @@ namespace CRM.Infrastructure.Repositories.Identity
             return await _context.Users
                 .FirstOrDefaultAsync(x => x.EmailNormalized == normalizedEmail, cancellationToken);
         }
+
+        public async Task<User?> GetByIdAsync(
+            Guid tenantId,
+            Guid userId,
+            CancellationToken cancellationToken
+            )
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(x =>
+                x.TenantId == tenantId &&
+                x.Id == userId,
+                cancellationToken
+                );
+        }
     }
 }

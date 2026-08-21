@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!--
+      =============================================================
+      CRM.Gateway — Phase 0 Structural Scaffolding Placeholder
+      =============================================================
+      This project is intentionally minimal. It exists only to
+      establish the correct directory structure for the future
+      API Gateway implementation.
+
+      DO NOT add YARP, routing, or middleware here yet.
+      YARP implementation is a future migration phase.
+
+      When ready, add:
+        <PackageReference Include="Yarp.ReverseProxy" Version="x.x.x" />
+      =============================================================
+    -->
+  </PropertyGroup>
+
+</Project>

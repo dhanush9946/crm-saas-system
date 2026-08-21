@@ -36,6 +36,11 @@ public sealed class Lead : BaseEntity, IAuditable
     public string? ScoreVersion { get; private set; }
 
     public Guid? OwnerUserId { get; private set; }
+    public Guid? ConvertedCustomerId { get; private set; }
+
+    public Guid? ConvertedByUserId { get; private set; }
+
+    public DateTime? ConvertedAtUtc { get; private set; }
 
     public bool IsDeleted { get; private set; }
 
@@ -124,16 +129,49 @@ public sealed class Lead : BaseEntity, IAuditable
         SetUpdated();
     }
 
-    public void ChangeStatus(LeadStatus status)
+    public void ChangeStatus(LeadStatus newStatus)
     {
         EnsureNotDeleted();
 
-        if (Status == status)
+        if (Status == newStatus)
+        {
             return;
+        }
 
-        Status = status;
+        if (!IsValidStatusTransition(Status, newStatus))
+        {
+            throw new InvalidOperationException(
+                $"Cannot change lead status from {Status} to {newStatus}.");
+        }
+
+        Status = newStatus;
 
         SetUpdated();
+    }
+
+    private static bool IsValidStatusTransition(
+        LeadStatus currentStatus,
+        LeadStatus newStatus)
+    {
+        return currentStatus switch
+        {
+            LeadStatus.New =>
+                newStatus == LeadStatus.Contacted ||
+                newStatus == LeadStatus.Lost,
+
+            LeadStatus.Contacted =>
+                newStatus == LeadStatus.Qualified ||
+                newStatus == LeadStatus.Lost,
+
+            LeadStatus.Qualified =>
+                newStatus == LeadStatus.Lost,
+
+            LeadStatus.Converted => false,
+
+            LeadStatus.Lost => false,
+
+            _ => false
+        };
     }
 
     public void AssignOwner(Guid? ownerUserId)
@@ -296,6 +334,67 @@ public sealed class Lead : BaseEntity, IAuditable
         {
             throw new InvalidOperationException(
                 "Deleted lead cannot be modified.");
+        }
+    }
+
+
+
+    public void ConvertToCustomer(
+    Guid customerId,
+    Guid convertedByUserId,
+    DateTime convertedAtUtc)
+    {
+        EnsureNotDeleted();
+
+        if (customerId == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "CustomerId is required.");
+        }
+
+        if (convertedByUserId == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "ConvertedByUserId is required.");
+        }
+
+        if (Status != LeadStatus.Qualified)
+        {
+            throw new InvalidOperationException(
+                "Only qualified leads can be converted.");
+        }
+
+        if (ConvertedCustomerId.HasValue)
+        {
+            throw new InvalidOperationException(
+                "Lead has already been converted.");
+        }
+
+        ConvertedCustomerId = customerId;
+        ConvertedByUserId = convertedByUserId;
+        ConvertedAtUtc = convertedAtUtc;
+
+        Status = LeadStatus.Converted;
+
+        SetUpdated();
+    }
+
+    public bool CanConvertToDeal()
+    {
+        EnsureNotDeleted();
+
+        return Status == LeadStatus.Qualified
+               || Status == LeadStatus.Converted;
+    }
+
+    public void EnsureCanConvertToDeal()
+    {
+        EnsureNotDeleted();
+
+        if (!ConvertedCustomerId.HasValue)
+        {
+            throw new InvalidOperationException(
+                "The lead must be converted to a customer before it can be converted to a deal.");
         }
     }
 }

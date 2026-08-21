@@ -1,7 +1,12 @@
+using CRM.API.Contracts.Leads;
 using CRM.API.Requests.Leads;
 using CRM.API.Responses;
 using CRM.API.Responses.Leads;
 using CRM.Application.Common.Models;
+using CRM.Application.CRM.Leads.Commands.AssignLead;
+using CRM.Application.CRM.Leads.Commands.ChangeLeadStatus;
+using CRM.Application.CRM.Leads.Commands.ConvertLeadToCustomer;
+using CRM.Application.CRM.Leads.Commands.ConvertLeadToDeal;
 using CRM.Application.CRM.Leads.Commands.CreateLead;
 using CRM.Application.CRM.Leads.Commands.DeleteLead;
 using CRM.Application.CRM.Leads.Commands.UpdateLead;
@@ -174,5 +179,96 @@ public sealed class LeadsController : ControllerBase
             cancellationToken);
 
         return Ok(result);
+    }
+
+    [HttpPost("{leadId:guid}/convert-to-customer")]
+    public async Task<IActionResult> ConvertToCustomer(
+    Guid leadId,
+    CancellationToken cancellationToken)
+    {
+        var command = new ConvertLeadToCustomerCommand
+        {
+            LeadId = leadId
+        };
+
+        var result = await _mediator.Send(
+            command,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<LeadConversionResultDto>
+                .SuccessResponse(
+                    result,
+                    HttpContext.TraceIdentifier));
+    }
+
+
+
+    [HttpPost("{leadId:guid}/convert-to-deal")]
+    public async Task<IActionResult> ConvertToDeal(
+    Guid leadId,
+    [FromBody] ConvertLeadToDealRequest request,
+    CancellationToken cancellationToken)
+    {
+        var command = new ConvertLeadToDealCommand
+        {
+            LeadId = leadId,
+            Title = request.Title,
+            Value = request.Value,
+            Stage = request.Stage,
+            ExpectedCloseDate = request.ExpectedCloseDate,
+            OwnerUserId = request.OwnerUserId
+        };
+
+        var result = await _mediator.Send(
+            command,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<LeadConversionResultDto>
+                .SuccessResponse(
+                    result,
+                    HttpContext.TraceIdentifier));
+    }
+
+
+    [HttpPatch("{leadId:guid}/status")]
+    public async Task<IActionResult> ChangeStatus(
+    Guid leadId,
+    [FromBody] ChangeLeadStatusRequest request,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new ChangeLeadStatusCommand
+            {
+                LeadId = leadId,
+                Status = request.Status
+            },
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Lead status updated successfully.",
+                HttpContext.TraceIdentifier));
+    }
+
+    [HttpPatch("{leadId:guid}/assign")]
+    public async Task<IActionResult> AssignLead(
+    Guid leadId,
+    [FromBody] AssignLeadRequest request,
+    CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new AssignLeadCommand
+            {
+                LeadId = leadId,
+                OwnerUserId = request.OwnerUserId
+            },
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<string>.SuccessResponse(
+                "Lead assigned successfully.",
+                HttpContext.TraceIdentifier));
     }
 }

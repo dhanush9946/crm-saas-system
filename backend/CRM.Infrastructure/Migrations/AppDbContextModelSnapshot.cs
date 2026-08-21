@@ -227,6 +227,15 @@ namespace CRM.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("ConvertedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ConvertedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ConvertedCustomerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
@@ -296,6 +305,56 @@ namespace CRM.Infrastructure.Migrations
                         .HasDatabaseName("IX_Leads_Tenant_Status");
 
                     b.ToTable("Leads", (string)null);
+                });
+
+            modelBuilder.Entity("CRM.Domain.CRM.Entities.LeadConversionHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ConversionType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ConvertedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ConvertedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LeadId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RelatedEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ConvertedAtUtc")
+                        .HasDatabaseName("IX_LeadConversionHistories_Tenant_ConvertedAt");
+
+                    b.HasIndex("TenantId", "LeadId")
+                        .HasDatabaseName("IX_LeadConversionHistories_Tenant_Lead");
+
+                    b.HasIndex("TenantId", "ConversionType", "RelatedEntityId")
+                        .HasDatabaseName("IX_LeadConversionHistories_Tenant_Conversion");
+
+                    b.ToTable("LeadConversionHistories", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Domain.Common.AuditLog", b =>

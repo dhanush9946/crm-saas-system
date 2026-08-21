@@ -1,0 +1,152 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36717.8
+MinimumVisualStudioVersion = 10.0.40219.1
+
+# -----------------------------------------------------------------------
+# Solution Folders
+# -----------------------------------------------------------------------
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{A1B2C3D4-0001-0001-0001-000000000001}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{A1B2C3D4-0002-0002-0002-000000000002}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "identity", "identity", "{A1B2C3D4-0003-0003-0003-000000000003}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{A1B2C3D4-0004-0004-0004-000000000004}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{A1B2C3D4-0005-0005-0005-000000000005}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gateway", "gateway", "{A1B2C3D4-0006-0006-0006-000000000006}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A1B2C3D4-0007-0007-0007-000000000007}"
+EndProject
+
+# -----------------------------------------------------------------------
+# Backend Projects (paths relative to root CRM.sln)
+# GUIDs match backend/CRM.sln exactly.
+# -----------------------------------------------------------------------
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.API", "backend\CRM.API\CRM.API.csproj", "{094E4754-DC66-4394-AB9F-B5774FDDCAA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Application", "backend\CRM.Application\CRM.Application.csproj", "{A21D3A59-3C07-4388-90E9-9B0F4FC3AC1A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Domain", "backend\CRM.Domain\CRM.Domain.csproj", "{81647C27-3265-42A7-94DE-A443565C9C10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Infrastructure", "backend\CRM.Infrastructure\CRM.Infrastructure.csproj", "{29ACF626-CA50-42F4-A2D1-3606B584839A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Shared", "backend\CRM.Shared\CRM.Shared.csproj", "{05690D67-A2D2-49D3-8F4B-DF5020192FB4}"
+EndProject
+
+# -----------------------------------------------------------------------
+# Identity Service Projects (paths relative to root CRM.sln)
+# GUIDs match services/identity/CRM.Identity.sln exactly.
+# -----------------------------------------------------------------------
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Identity.Domain", "services\identity\CRM.Identity.Domain\CRM.Identity.Domain.csproj", "{F1850F5E-FA60-42D1-AF4C-87E2EEDA0DCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Identity.Application", "services\identity\CRM.Identity.Application\CRM.Identity.Application.csproj", "{166DE949-D019-4D16-A818-78FB55FB53AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Identity.Infrastructure", "services\identity\CRM.Identity.Infrastructure\CRM.Identity.Infrastructure.csproj", "{043ECAEE-B374-4A01-8147-454D5A2F764D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Identity.API", "services\identity\CRM.Identity.API\CRM.Identity.API.csproj", "{6849CA18-A483-4AE9-A681-48130C6EEFBA}"
+EndProject
+
+# -----------------------------------------------------------------------
+# Core Service Projects (paths relative to root CRM.sln)
+# GUIDs match services/core/CRM.Core.sln exactly.
+# -----------------------------------------------------------------------
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Core.Domain", "services\core\CRM.Core.Domain\CRM.Core.Domain.csproj", "{CC000001-0000-4000-A000-000000000001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Core.Application", "services\core\CRM.Core.Application\CRM.Core.Application.csproj", "{CC000002-0000-4000-A000-000000000002}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Core.Infrastructure", "services\core\CRM.Core.Infrastructure\CRM.Core.Infrastructure.csproj", "{CC000003-0000-4000-A000-000000000003}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM.Core.API", "services\core\CRM.Core.API\CRM.Core.API.csproj", "{CC000004-0000-4000-A000-000000000004}"
+EndProject
+
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{094E4754-DC66-4394-AB9F-B5774FDDCAA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{094E4754-DC66-4394-AB9F-B5774FDDCAA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{094E4754-DC66-4394-AB9F-B5774FDDCAA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{094E4754-DC66-4394-AB9F-B5774FDDCAA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A21D3A59-3C07-4388-90E9-9B0F4FC3AC1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A21D3A59-3C07-4388-90E9-9B0F4FC3AC1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A21D3A59-3C07-4388-90E9-9B0F4FC3AC1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A21D3A59-3C07-4388-90E9-9B0F4FC3AC1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81647C27-3265-42A7-94DE-A443565C9C10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81647C27-3265-42A7-94DE-A443565C9C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81647C27-3265-42A7-94DE-A443565C9C10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81647C27-3265-42A7-94DE-A443565C9C10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29ACF626-CA50-42F4-A2D1-3606B584839A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29ACF626-CA50-42F4-A2D1-3606B584839A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29ACF626-CA50-42F4-A2D1-3606B584839A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29ACF626-CA50-42F4-A2D1-3606B584839A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05690D67-A2D2-49D3-8F4B-DF5020192FB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05690D67-A2D2-49D3-8F4B-DF5020192FB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05690D67-A2D2-49D3-8F4B-DF5020192FB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05690D67-A2D2-49D3-8F4B-DF5020192FB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1850F5E-FA60-42D1-AF4C-87E2EEDA0DCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1850F5E-FA60-42D1-AF4C-87E2EEDA0DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1850F5E-FA60-42D1-AF4C-87E2EEDA0DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1850F5E-FA60-42D1-AF4C-87E2EEDA0DCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{166DE949-D019-4D16-A818-78FB55FB53AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{166DE949-D019-4D16-A818-78FB55FB53AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{166DE949-D019-4D16-A818-78FB55FB53AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{166DE949-D019-4D16-A818-78FB55FB53AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{043ECAEE-B374-4A01-8147-454D5A2F764D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{043ECAEE-B374-4A01-8147-454D5A2F764D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{043ECAEE-B374-4A01-8147-454D5A2F764D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{043ECAEE-B374-4A01-8147-454D5A2F764D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6849CA18-A483-4AE9-A681-48130C6EEFBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6849CA18-A483-4AE9-A681-48130C6EEFBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6849CA18-A483-4AE9-A681-48130C6EEFBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6849CA18-A483-4AE9-A681-48130C6EEFBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC000001-0000-4000-A000-000000000001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC000001-0000-4000-A000-000000000001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC000001-0000-4000-A000-000000000001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC000001-0000-4000-A000-000000000001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC000002-0000-4000-A000-000000000002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC000002-0000-4000-A000-000000000002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC000002-0000-4000-A000-000000000002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC000002-0000-4000-A000-000000000002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC000003-0000-4000-A000-000000000003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC000003-0000-4000-A000-000000000003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC000003-0000-4000-A000-000000000003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC000003-0000-4000-A000-000000000003}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC000004-0000-4000-A000-000000000004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC000004-0000-4000-A000-000000000004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC000004-0000-4000-A000-000000000004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC000004-0000-4000-A000-000000000004}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		# backend projects → backend solution folder
+		{094E4754-DC66-4394-AB9F-B5774FDDCAA0} = {A1B2C3D4-0001-0001-0001-000000000001}
+		{A21D3A59-3C07-4388-90E9-9B0F4FC3AC1A} = {A1B2C3D4-0001-0001-0001-000000000001}
+		{81647C27-3265-42A7-94DE-A443565C9C10} = {A1B2C3D4-0001-0001-0001-000000000001}
+		{29ACF626-CA50-42F4-A2D1-3606B584839A} = {A1B2C3D4-0001-0001-0001-000000000001}
+		{05690D67-A2D2-49D3-8F4B-DF5020192FB4} = {A1B2C3D4-0001-0001-0001-000000000001}
+		# identity and core solution folders → services solution folder
+		{A1B2C3D4-0003-0003-0003-000000000003} = {A1B2C3D4-0002-0002-0002-000000000002}
+		{A1B2C3D4-0004-0004-0004-000000000004} = {A1B2C3D4-0002-0002-0002-000000000002}
+		# identity service projects → identity solution folder
+		{F1850F5E-FA60-42D1-AF4C-87E2EEDA0DCE} = {A1B2C3D4-0003-0003-0003-000000000003}
+		{166DE949-D019-4D16-A818-78FB55FB53AE} = {A1B2C3D4-0003-0003-0003-000000000003}
+		{043ECAEE-B374-4A01-8147-454D5A2F764D} = {A1B2C3D4-0003-0003-0003-000000000003}
+		{6849CA18-A483-4AE9-A681-48130C6EEFBA} = {A1B2C3D4-0003-0003-0003-000000000003}
+		# core service projects → core solution folder
+		{CC000001-0000-4000-A000-000000000001} = {A1B2C3D4-0004-0004-0004-000000000004}
+		{CC000002-0000-4000-A000-000000000002} = {A1B2C3D4-0004-0004-0004-000000000004}
+		{CC000003-0000-4000-A000-000000000003} = {A1B2C3D4-0004-0004-0004-000000000004}
+		{CC000004-0000-4000-A000-000000000004} = {A1B2C3D4-0004-0004-0004-000000000004}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F1E2D3C4-B5A6-9788-ABCD-EF0123456789}
+	EndGlobalSection
+EndGlobal
