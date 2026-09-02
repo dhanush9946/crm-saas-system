@@ -1,4 +1,4 @@
-﻿using CRM.Application.Common.Interfaces;
+using CRM.Application.Common.Interfaces;
 using CRM.Application.Common.Interfaces.Persistence;
 using CRM.Application.CRM.Activities.Interfaces;
 using CRM.Application.CRM.Customers.Interfaces;
@@ -56,9 +56,6 @@ namespace CRM.Infrastructure
             services.Configure<GoogleAuthOptions>(configuration.GetSection("GoogleAuth"));
 
             services.AddScoped<IGoogleAuthService,GoogleAuthService>();
-
-            // Access token state validation
-            services.AddScoped<IAccessTokenStateValidator, DatabaseAccessTokenStateValidator>();
 
 
             //lead  assignment user validation

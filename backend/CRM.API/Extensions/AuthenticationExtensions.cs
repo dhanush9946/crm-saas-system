@@ -106,62 +106,6 @@ namespace CRM.API.Extensions
                                 JsonOptions);
 
                             await context.Response.WriteAsync(json);
-                        },
-
-                        OnTokenValidated = async context =>
-                        {
-                            var userIdValue =
-                                context.Principal?
-                                    .FindFirstValue(
-                                        ClaimTypes.NameIdentifier)
-                                ?? context.Principal?
-                                    .FindFirstValue(
-                                        JwtRegisteredClaimNames.Sub)
-                                ?? context.Principal?
-                                    .FindFirstValue("sub");
-
-                            var tenantIdValue =
-                                context.Principal?
-                                    .FindFirstValue("tenantId");
-
-                            var tokenVersionValue =
-                                context.Principal?
-                                    .FindFirstValue("ver");
-
-                            if (!Guid.TryParse(
-                                    userIdValue,
-                                    out var userId)
-                                || !Guid.TryParse(
-                                    tenantIdValue,
-                                    out var tenantId)
-                                || !int.TryParse(
-                                    tokenVersionValue,
-                                    out var tokenVersion))
-                            {
-                                context.Fail(
-                                    "Invalid token claims");
-
-                                return;
-                            }
-
-                            var tokenStateValidator =
-                                context.HttpContext
-                                    .RequestServices
-                                    .GetRequiredService<
-                                        IAccessTokenStateValidator>();
-
-                            var isValid =
-                                await tokenStateValidator.IsValidAsync(
-                                    userId,
-                                    tenantId,
-                                    tokenVersion,
-                                    context.HttpContext.RequestAborted);
-
-                            if (!isValid)
-                            {
-                                context.Fail(
-                                    "Token version is no longer valid");
-                            }
                         }
                     };
                 });
